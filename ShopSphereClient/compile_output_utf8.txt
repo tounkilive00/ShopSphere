@@ -1,0 +1,10 @@
+﻿javac.exe : Note: 
+C:\Users\hf\Documents\Coding\ShopSphere_NetBeans\ShopSphereClient\src\view\components\AppComboBox.java uses unchecked 
+or unsafe operations.
+At line:1 char:500
++ ... | Out-Null; & $javac -cp $jars -d $outDir -sourcepath "$clientSrc\src ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Note: C:\Users\...afe operations.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Note: Recompile with -Xlint:unchecked for details.
