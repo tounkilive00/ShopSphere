@@ -33,9 +33,10 @@ public class UserLogin extends JFrame {
 
     public UserLogin() {
         initComponents();
+        buildUI();
     }
 
-    private void initComponents() {
+    private void buildUI() {
         setTitle("ShopSphere — Connexion");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(420, 520);
@@ -174,7 +175,7 @@ public class UserLogin extends JFrame {
         loginBtn.setEnabled(false);
         loginBtn.setText("Connexion...");
 
-        SwingWorker<User, Void> worker = new SwingWorker<>() {
+        SwingWorker<User, Void> worker = new SwingWorker<User, Void>() {
             @Override
             protected User doInBackground() throws Exception {
                 UserService us = RMIClient.getUserService();
@@ -226,4 +227,23 @@ public class UserLogin extends JFrame {
             new UserLogin();
         });
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
 }

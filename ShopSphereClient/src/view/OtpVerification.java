@@ -29,10 +29,11 @@ public class OtpVerification extends JFrame {
         this.raison  = raison;
         this.contact = contact;
         initComponents();
+        buildUI();
         startTimer();
     }
 
-    private void initComponents() {
+    private void buildUI() {
         setTitle("ShopSphere — Verification OTP");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(400, 440);
@@ -136,7 +137,7 @@ public class OtpVerification extends JFrame {
         if (code.length() != 6) { showError("Entrez les 6 chiffres du code."); return; }
         verifyBtn.setEnabled(false); verifyBtn.setText("Verification...");
 
-        SwingWorker<Boolean, Void> w = new SwingWorker<>() {
+        SwingWorker<Boolean, Void> w = new SwingWorker<Boolean, Void>() {
             @Override protected Boolean doInBackground() throws Exception {
                 return RMIClient.getUserService().verifierOtp(userId, code, raison);
             }
@@ -171,4 +172,23 @@ public class OtpVerification extends JFrame {
     }
 
     private void showError(String msg) { statusLabel.setText(msg); statusLabel.setVisible(true); }
+
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
 }

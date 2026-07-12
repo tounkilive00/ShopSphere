@@ -22,9 +22,10 @@ public class CartView extends JFrame {
     public CartView(User user) {
         this.currentUser = user;
         initComponents();
+        buildUI();
     }
 
-    private void initComponents() {
+    private void buildUI() {
         setTitle("ShopSphere — Mon panier");
         setSize(600, 520);
         setLocationRelativeTo(null);
@@ -145,7 +146,7 @@ public class CartView extends JFrame {
                 JOptionPane.QUESTION_MESSAGE, null, paiements, paiements[0]);
         if (paiement == null) return;
 
-        SwingWorker<model.Order, Void> worker = new SwingWorker<>() {
+        SwingWorker<model.Order, Void> worker = new SwingWorker<model.Order, Void>() {
             @Override protected model.Order doInBackground() throws Exception {
                 return RMIClient.getOrderService().passerCommande(
                         currentUser.getId(), Session.getCart(), adresse, paiement);
@@ -167,4 +168,23 @@ public class CartView extends JFrame {
         };
         worker.execute();
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
 }

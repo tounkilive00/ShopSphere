@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans/ShopSphereServer/src/hibernate.cfg.xml</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans/ShopSphereServer/src/dao/OtpRecordDao.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans/ShopSphereServer/src/controller/Server.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans/ShopSphereServer/src/dao/ProductDao.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans/ShopSphereServer/src/dao/HibernateUtil.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans/ShopSphereServer/src/dao/OrderItemDao.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans/ShopSphereServer/src/service/implimentation/NotificationServiceImpl.java</file>
+        </group>
+    </open-files>
+</project-private>

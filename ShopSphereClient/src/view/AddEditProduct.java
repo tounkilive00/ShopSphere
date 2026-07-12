@@ -37,10 +37,11 @@ public class AddEditProduct extends JFrame {
         this.editProduct = product;
         this.onSave      = onSave;
         initComponents();
+        buildUI();
         if (product != null) prefillForm(product);
     }
 
-    private void initComponents() {
+    private void buildUI() {
         setTitle(editProduct == null ? "ShopSphere — Nouveau produit" : "ShopSphere — Modifier produit");
         setSize(500, 640);
         setLocationRelativeTo(null);
@@ -170,7 +171,7 @@ public class AddEditProduct extends JFrame {
         final int fstock = stock;
         saveBtn.setEnabled(false); saveBtn.setText("Enregistrement...");
 
-        SwingWorker<Product, Void> worker = new SwingWorker<>() {
+        SwingWorker<Product, Void> worker = new SwingWorker<Product, Void>() {
             @Override protected Product doInBackground() throws Exception {
                 ProductService ps = RMIClient.getProductService();
                 Product p = editProduct != null ? editProduct : new Product();
@@ -203,4 +204,23 @@ public class AddEditProduct extends JFrame {
     }
 
     private void showError(String msg) { statusLabel.setText(msg); statusLabel.setVisible(true); }
+
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
 }

@@ -26,10 +26,11 @@ public class MarketPlace extends JFrame {
     public MarketPlace(User user) {
         this.currentUser = user;
         initComponents();
+        buildUI();
         loadProducts(null);
     }
 
-    private void initComponents() {
+    private void buildUI() {
         setTitle("ShopSphere — Catalogue");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1100, 720);
@@ -154,7 +155,7 @@ public class MarketPlace extends JFrame {
         productsGrid.add(new JLabel("Chargement des produits..."));
         productsGrid.revalidate();
 
-        SwingWorker<List<Product>, Void> worker = new SwingWorker<>() {
+        SwingWorker<List<Product>, Void> worker = new SwingWorker<List<Product>, Void>() {
             @Override protected List<Product> doInBackground() throws Exception {
                 ProductService ps = RMIClient.getProductService();
                 if (keyword != null && !keyword.isEmpty()) {
@@ -202,7 +203,7 @@ public class MarketPlace extends JFrame {
         try {
             Product.Category c = Product.Category.valueOf(cat.toUpperCase()
                     .replace(" ", "_").replace("É","E").replace("Â","A").replace("Î","I"));
-            SwingWorker<List<Product>, Void> w = new SwingWorker<>() {
+            SwingWorker<List<Product>, Void> w = new SwingWorker<List<Product>, Void>() {
                 @Override protected List<Product> doInBackground() throws Exception {
                     return RMIClient.getProductService().findProductRecordsByCategory(c);
                 }
@@ -234,4 +235,23 @@ public class MarketPlace extends JFrame {
             default:             return "🏪";
         }
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
 }
