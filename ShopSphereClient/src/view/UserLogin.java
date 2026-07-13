@@ -11,6 +11,8 @@ package view;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import model.User;
@@ -30,12 +32,21 @@ public class UserLogin extends JFrame {
     private PrimaryButton    loginBtn;
     private SecondaryButton  registerBtn;
     private JLabel           statusLabel;
+    private UserService userService;
 
     public UserLogin() {
         initComponents();
         buildUI();
+        connectToServer();
     }
-
+     private void connectToServer() {
+        try {
+            Registry reg = LocateRegistry.getRegistry("127.0.0.1", 4999);
+            this.userService = (UserService) reg.lookup("UserService");
+        } catch (Exception e) {
+            System.err.println("Server connection failed: " + e.getMessage());
+        }
+    }
     private void buildUI() {
         setTitle("ShopSphere — Connexion");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
