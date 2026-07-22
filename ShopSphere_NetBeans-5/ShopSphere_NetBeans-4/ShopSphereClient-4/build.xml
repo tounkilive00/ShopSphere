@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ShopSphereClient" default="default" basedir=".">
+    <description>ShopSphere RMI Client — Interface Swing Inspiree de AgriConnectClient</description>
+    <import file="nbproject/build-impl.xml"/>
+</project>
