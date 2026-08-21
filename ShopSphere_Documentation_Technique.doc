@@ -1,0 +1,296 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office'
+      xmlns:w='urn:schemas-microsoft-com:office:word'
+      xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>ShopSphere — Documentation Technique & Fonctionnelle</title>
+<!--[if gte mso 9]>
+<xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>100</w:Zoom>
+  <w:DoNotOptimizeForBrowser/>
+ </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+    @page {
+        size: A4;
+        margin: 2.5cm 2.5cm 2.5cm 2.5cm;
+    }
+    body {
+        font-family: 'Segoe UI', Calibri, Arial, sans-serif;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #2D3748;
+    }
+    h1 {
+        font-size: 24pt;
+        color: #1A3C5E;
+        border-bottom: 2px solid #E8A020;
+        padding-bottom: 8px;
+        margin-top: 24pt;
+        margin-bottom: 12pt;
+    }
+    h2 {
+        font-size: 16pt;
+        color: #2B4C7E;
+        margin-top: 18pt;
+        margin-bottom: 8pt;
+    }
+    h3 {
+        font-size: 13pt;
+        color: #1A3C5E;
+        margin-top: 14pt;
+        margin-bottom: 6pt;
+    }
+    p {
+        margin-bottom: 8pt;
+        text-align: justify;
+    }
+    .cover {
+        text-align: center;
+        padding-top: 40px;
+        padding-bottom: 60px;
+        border-bottom: 4px solid #1A3C5E;
+        margin-bottom: 40px;
+    }
+    .cover-title {
+        font-size: 32pt;
+        font-weight: bold;
+        color: #1A3C5E;
+        margin-bottom: 10px;
+    }
+    .cover-subtitle {
+        font-size: 16pt;
+        color: #E8A020;
+        margin-bottom: 30px;
+    }
+    .cover-meta {
+        font-size: 11pt;
+        color: #718096;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12pt;
+        margin-bottom: 16pt;
+    }
+    th, td {
+        border: 1px solid #CBD5E0;
+        padding: 8pt 10pt;
+        text-align: left;
+        font-size: 10.5pt;
+    }
+    th {
+        background-color: #1A3C5E;
+        color: #FFFFFF;
+        font-weight: bold;
+    }
+    tr:nth-child(even) {
+        background-color: #F7FAFC;
+    }
+    .code-block {
+        background-color: #1E1E1E;
+        color: #D4D4D4;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 9.5pt;
+        padding: 10pt 12pt;
+        border-radius: 4px;
+        margin-top: 8pt;
+        margin-bottom: 12pt;
+        white-space: pre-wrap;
+    }
+    .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        font-size: 9pt;
+        font-weight: bold;
+        border-radius: 4px;
+        color: white;
+        background-color: #1A3C5E;
+    }
+    .callout {
+        background-color: #EBF8FF;
+        border-left: 4px solid #3182CE;
+        padding: 10pt 12pt;
+        margin-top: 10pt;
+        margin-bottom: 12pt;
+        border-radius: 0 4px 4px 0;
+    }
+    .callout-warning {
+        background-color: #FFFAF0;
+        border-left: 4px solid #DD6B20;
+        padding: 10pt 12pt;
+        margin-top: 10pt;
+        margin-bottom: 12pt;
+    }
+</style>
+</head>
+<body>
+
+<div class="cover">
+    <div class="cover-title">ShopSphere</div>
+    <div class="cover-subtitle">Dossier de Documentation Technique & Manuel Système</div>
+    <p style="text-align: center; font-size: 12pt;">Plateforme e-Commerce Distribuée Java Swing & RMI Multi-Tier</p>
+    <br/><br/>
+    <div class="cover-meta">
+        <strong>Auteur :</strong> Équipe de Développement ShopSphere<br/>
+        <strong>Version :</strong> 2.0.0 (Édition Finale Sécurisée & Localisée FCFA)<br/>
+        <strong>Date :</strong> 21 Août 2026<br/>
+        <strong>Technologies :</strong> Java 8 / 17, Java RMI, Hibernate ORM 4.3, PostgreSQL, Swing UI
+    </div>
+</div>
+
+<h1>1. Présentation Générale du Projet</h1>
+<p>
+    <strong>ShopSphere</strong> est une application e-commerce distribuée de haute performance conçue selon une architecture multi-tier (Client-Serveur) articulée autour du middleware <strong>Java RMI (Remote Method Invocation)</strong> et de l'ORM <strong>Hibernate</strong> avec une base de données relationnelle <strong>PostgreSQL</strong>.
+</p>
+<p>
+    L'application offre une expérience utilisateur moderne et fluide via une interface graphique Java Swing entièrement personnalisée, intégrant des composants interactifs animés (boutons à effet d'échelle, notifications toast non-bloquantes, cartes produits dynamiques). Elle est entièrement localisée pour la zone Afrique de l'Ouest / Centrale en utilisant le <strong>Franc CFA (FCFA)</strong> comme devise monétaire principale.
+</p>
+
+<div class="callout">
+    <strong>Points Clés du Système :</strong>
+    <ul>
+        <li><strong>Architecture Distribuée RMI :</strong> Découplage strict entre le client lourd Swing et la logique métier hébergée sur le serveur RMI (port 4999).</li>
+        <li><strong>Multi-Rôles Système :</strong> Prise en charge des utilisateurs Acheteurs (CLIENT), Vendeurs (SELLER) et Administrateurs (ADMIN).</li>
+        <li><strong>Sécurité Renforcée :</strong> Chiffrement PBKDF2 avec sel dynamique, protection anti-brute-force avec backoff exponentiel et isolation des transactions.</li>
+        <li><strong>Devise Régionale :</strong> Utilisation systématique du FCFA sur l'ensemble des modules (Panier, Catalogue, Tableau de bord vendeur, Historique de commandes).</li>
+    </ul>
+</div>
+
+<h1>2. Architecture Technique & Composants</h1>
+
+<h2>2.1 Vue d'Ensemble de la Structure</h2>
+<p>Le projet est divisé en deux modules autonomes compilés séparément :</p>
+
+<table>
+    <tr>
+        <th>Module</th>
+        <th>Rôle & Contenu</th>
+        <th>Technologies Clés</th>
+    </tr>
+    <tr>
+        <td><strong>ShopSphereServer-6</strong></td>
+        <td>Serveur métier RMI, couche d'accès aux données (DAO), gestionnaires de sécurité et persistance Hibernate.</td>
+        <td>Java RMI Registry (port 4999), Hibernate ORM, PostgreSQL JDBC, PBKDF2.</td>
+    </tr>
+    <tr>
+        <td><strong>ShopSphereClient-6</strong></td>
+        <td>Interface graphique utilisateur Swing (Desktop Client) consommant les services RMI distants.</td>
+        <td>Java Swing, Custom Theme, Toast Engine, Layout Managers (GridLayout 6-col, CardLayout).</td>
+    </tr>
+</table>
+
+<h2>2.2 Services RMI Distribués</h2>
+<p>La communication entre le client et le serveur s'effectue au moyen d'interfaces Java RMI exposées dans le package <code>service0</code> et implémentées dans <code>service.implimentation</code> :</p>
+
+<ul>
+    <li><code>UserService</code> / <code>UserServiceImpl</code> : Authentification sécurisée, inscription, mise à jour des profils, réinitialisation de mot de passe par code OTP.</li>
+    <li><code>ProductService</code> / <code>ProductServiceImpl</code> : Gestion du catalogue, création/modification des produits par les vendeurs, filtrage par catégorie, contrôle des stocks.</li>
+    <li><code>OrderService</code> / <code>OrderServiceImpl</code> : Transformation du panier en commande, calcul des totaux en FCFA, calcul du chiffre d'affaires vendeur et émission de notifications.</li>
+    <li><code>NotificationService</code> / <code>NotificationServiceImpl</code> : Envoi et récupération des notifications système pour les utilisateurs.</li>
+</ul>
+
+<div class="code-block">
+// Exemple de lookup RMI dans le Client (UserLogin.java)
+Registry registry = LocateRegistry.getRegistry("127.0.0.1", 4999);
+UserService userService = (UserService) registry.lookup("UserService");
+User authenticatedUser = userService.login(email, rawPassword);
+</div>
+
+<h1>3. Modèle de Données & Base de Données</h1>
+
+<p>Le schéma relationnel PostgreSQL est géré via Hibernate ORM avec la stratégie <code>hbm2ddl.auto = update</code>. Voici les entités principales du système :</p>
+
+<table>
+    <tr>
+        <th>Entité</th>
+        <th>Table SQL</th>
+        <th>Attributs Principaux</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><strong>User</strong></td>
+        <td><code>users</code></td>
+        <td>id, email, passwordHash, fullName, role (CLIENT, SELLER, ADMIN), profilePictureUrl</td>
+        <td>Comptes utilisateurs et droits d'accès. Mots de passe sécurisés par PBKDF2.</td>
+    </tr>
+    <tr>
+        <td><strong>Product</strong></td>
+        <td><code>products</code></td>
+        <td>id, title, description, basePrice, salePrice, stockQty, category, imageUrl, visible, status, seller_id</td>
+        <td>Catalogue produits. Supporte le prix promotionnel, les images distantes/locales et le masquage temporaire (visible).</td>
+    </tr>
+    <tr>
+        <td><strong>Order</strong></td>
+        <td><code>orders</code></td>
+        <td>id, orderDate, status, subtotal, shippingCost, totalAmount, paymentMethod, buyer_id</td>
+        <td>Commandes enregistrées avec statut (EN_ATTENTE_PAIEMENT, PAYEE, EXPEDIEE, etc.). Totaux calculés en FCFA.</td>
+    </tr>
+    <tr>
+        <td><strong>OrderItem</strong></td>
+        <td><code>order_items</code></td>
+        <td>id, quantity, unitPrice, order_id, product_id, seller_id</td>
+        <td>Lignes individuelles de commande liées au produit et au vendeur correspondant.</td>
+    </tr>
+    <tr>
+        <td><strong>Notification</strong></td>
+        <td><code>notifications</code></td>
+        <td>id, title, message, date, readStatus, user_id</td>
+        <td>Messages d'information adressés aux utilisateurs suite aux actions système.</td>
+    </tr>
+</table>
+
+<h1>4. Fonctionnalités & Expérience Utilisateur par Rôle</h1>
+
+<h2>4.1 Acheteur (CLIENT)</h2>
+<ul>
+    <li><strong>Navigation Catalogue Ergonomique :</strong> Grille de produits affichant <strong>6 articles par ligne</strong> pour une lisibilité maximale sans encombrement vertical.</li>
+    <li><strong>Fiche Produit Détaillée :</strong> Visualisation des images HD, calcul du pourcentage de réduction (ex: <code>-20%</code>), évaluation par étoiles et vérification du stock en temps réel.</li>
+    <li><strong>Gestion du Panier & Commande :</strong> Ajout d'articles en un clic, modification des quantités, calcul automatique du sous-total et de la livraison en <strong>FCFA</strong>.</li>
+    <li><strong>Historique & Suivi :</strong> Consultation des commandes passées avec suivi des statuts d'expédition.</li>
+</ul>
+
+<h2>4.2 Vendeur (SELLER)</h2>
+<ul>
+    <li><strong>Tableau de Bord Commercial :</strong> KPI synthétiques affichant le <strong>Revenu Total accumulé en FCFA</strong> et le nombre de ventes réalisées.</li>
+    <li><strong>Gestion des Produits :</strong> Formulaire complet d'ajout/modification permettant de définir le prix de base, le prix promo, le stock, la référence SKU, la catégorie et l'URL/photo du produit.</li>
+    <li><strong>Contrôle de Visibilité :</strong> Possibilité de masquer temporairement un produit du catalogue (toggle <code>visible</code>) sans supprimer ses historiques de vente.</li>
+</ul>
+
+<h2>4.3 Administrateur (ADMIN)</h2>
+<ul>
+    <li><strong>Panneau de Modération Centralisé :</strong> Vue d'ensemble de l'ensemble des utilisateurs, produits et commandes de la plateforme.</li>
+    <li><strong>Gestion des Comptes :</strong> Activation, désactivation ou modification des rôles utilisateurs.</li>
+</ul>
+
+<h1>5. Sécurité, Performance & Design System</h1>
+
+<h2>5.1 Protection Anti-Brute-Force & Chiffrement</h2>
+<p>
+    Le service <code>LoginAttemptService</code> protège la plateforme contre les attaques par dictionnaire ou force brute. Il limite les tentatives à 5 échecs par adresse IP / email sur une fenêtre de 15 minutes avec un délai de réponse exponentiel. Les mots de passe sont hachés avec <strong>PBKDF2-HMAC-SHA256</strong> (10 000 itérations avec sel aléatoire de 16 octets).
+</p>
+
+<h2>5.2 Design System v2.0 & Composants Modernes</h2>
+<ul>
+    <li><strong>Palette de Couleurs SRS :</strong> Bleu Marine Profond (<code>#1A3C5E</code>), Or Ambre (<code>#E8A020</code>) et Gris-Bleu Doux (<code>#F0F4F8</code>).</li>
+    <li><strong>Typographie Dynamique :</strong> Détection automatique de <em>Segoe UI</em> (Windows) avec repli élégant sur <em>Sans-Serif</em>.</li>
+    <li><strong>Système de Toast Notifications :</strong> Remplacement des boîtes de dialogue bloquantes <code>JOptionPane</code> par des notifications glissantes animées Material Design (Succès, Erreur, Avertissement, Info).</li>
+    <li><strong>Interactivité NetBeans Builder :</strong> Préservation des méthodes <code>initComponents()</code> sans appel à <code>pack()</code> afin d'assurer une parfaite compatibilité avec l'éditeur visuel NetBeans.</li>
+</ul>
+
+<div class="callout-warning">
+    <strong>Note d'Exploitation :</strong><br/>
+    Le serveur doit toujours être démarré en premier via la classe principale <code>server.ShopSphereServerMain</code> pour enregistrer les services RMI sur le port 4999 avant d'exécuter le client <code>view.UserLogin</code>.
+</div>
+
+<br/>
+<hr/>
+<p style="text-align: center; font-size: 9.5pt; color: #718096;">
+    ShopSphere — Document généré automatiquement pour la documentation projet &mdash; Tous droits réservés &copy; 2026
+</p>
+
+</body>
+</html>
