@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- ── Database Connection ──────────────────────────────────────── -->
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/shopsphere_db?stringtype=unspecified</property>
+        <property name="hibernate.connection.username">postgres</property>
+        <property name="hibernate.connection.password">Tounkarababa201</property>
+
+        <!-- ── Schema management & SQL options ──────────────────────────── -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">false</property>
+
+        <!-- ── Connection Pool ─────────────────────────────────────────── -->
+        <property name="hibernate.connection.pool_size">10</property>
+        <property name="hibernate.jdbc.batch_size">20</property>
+        <property name="hibernate.jdbc.fetch_size">50</property>
+
+        <!-- ── Mappings ─────────────────────────────────────────────────── -->
+        <mapping class="model.Category"/>
+        <mapping class="model.Notification"/>
+        <mapping class="model.Order"/>
+        <mapping class="model.OrderItem"/>
+        <mapping class="model.OtpRecord"/>
+        <mapping class="model.Product"/>
+        <mapping class="model.User"/>
+    </session-factory>
+</hibernate-configuration>

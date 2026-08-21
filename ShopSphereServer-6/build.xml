@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ShopSphereServer NetBeans Build Script -->
+<project name="ShopSphereServer" default="default" basedir=".">
+    <description>ShopSphere RMI Server — Inspire de AgriConnectServer</description>
+    <import file="nbproject/build-impl.xml"/>
+</project>
