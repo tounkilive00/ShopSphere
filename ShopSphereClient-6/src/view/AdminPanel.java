@@ -352,7 +352,7 @@ public class AdminPanel extends JFrame {
         };
         productsTable = new JTable(productsModel);
         styleTable(productsTable);
-        productsTable.setRowHeight(34);
+        productsTable.setRowHeight(38);
 
         // Colonne Actions cliquable — design fourni par view.components.ProductActionsCell,
         // logique metier (appels RMI) fournie ici (suppression definitive avec repli archive).
@@ -363,7 +363,7 @@ public class AdminPanel extends JFrame {
                 this::adminConfirmAndDeleteProduct);
         productsTable.getColumnModel().getColumn(7).setCellRenderer(actionsCell);
         productsTable.getColumnModel().getColumn(7).setCellEditor(actionsCell);
-        productsTable.getColumnModel().getColumn(7).setPreferredWidth(220);
+        productsTable.getColumnModel().getColumn(7).setPreferredWidth(240);
 
         p.add(new JScrollPane(productsTable), BorderLayout.CENTER);
         return p;
@@ -460,12 +460,15 @@ public class AdminPanel extends JFrame {
     }
 
     private void styleTable(JTable t) {
-        t.setFont(Theme.FONT_BODY);
-        t.setRowHeight(32);
-        t.getTableHeader().setFont(Theme.FONT_HEADING);
+        t.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        t.setRowHeight(38);
+        t.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
         t.getTableHeader().setBackground(Theme.PRIMARY);
         t.getTableHeader().setForeground(Theme.WHITE);
-        t.setGridColor(Theme.LIGHT_GREY);
+        t.getTableHeader().setPreferredSize(new Dimension(0, 36));
+        t.setGridColor(new Color(0xE2, 0xE8, 0xF0));
+        t.setShowHorizontalLines(true);
+        t.setShowVerticalLines(false);
         t.setSelectionBackground(new Color(0xE0, 0xF2, 0xFE));
         t.setSelectionForeground(Theme.DARK_TEXT);
     }

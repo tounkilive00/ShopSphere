@@ -68,13 +68,16 @@ public class OrderHistory extends JFrame {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         ordersTable = new JTable(model);
-        ordersTable.setFont(Theme.FONT_BODY);
-        ordersTable.setRowHeight(30);
-        ordersTable.setGridColor(Theme.LIGHT_GREY);
-        ordersTable.getTableHeader().setFont(Theme.FONT_HEADING);
+        ordersTable.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        ordersTable.setRowHeight(38);
+        ordersTable.setGridColor(new Color(0xE2, 0xE8, 0xF0));
+        ordersTable.setShowHorizontalLines(true);
+        ordersTable.setShowVerticalLines(false);
+        ordersTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
         ordersTable.getTableHeader().setBackground(Theme.PRIMARY);
         ordersTable.getTableHeader().setForeground(Theme.WHITE);
-        ordersTable.setSelectionBackground(Theme.NEUTRAL);
+        ordersTable.getTableHeader().setPreferredSize(new Dimension(0, 36));
+        ordersTable.setSelectionBackground(new Color(0xE0, 0xF2, 0xFE));
         ordersTable.setSelectionForeground(Theme.DARK_TEXT);
 
         // Colorer les statuts
@@ -82,9 +85,14 @@ public class OrderHistory extends JFrame {
             @Override public Component getTableCellRendererComponent(JTable t, Object v,
                     boolean sel, boolean focus, int row, int col) {
                 super.getTableCellRendererComponent(t, v, sel, focus, row, col);
+                if (!sel) {
+                    setBackground(row % 2 == 0 ? Color.WHITE : new Color(0xF8, 0xFA, 0xFC));
+                }
                 if (col == 2 && v != null) {
+                    setFont(new Font("Segoe UI", Font.BOLD, 12));
                     setForeground(StatusBadge.colorForOrderStatus(v.toString()));
                 } else {
+                    setFont(new Font("Segoe UI", Font.PLAIN, 13));
                     setForeground(Theme.DARK_TEXT);
                 }
                 return this;

@@ -91,7 +91,7 @@ public class SellerDashboard extends JFrame {
         };
         productsTable = new JTable(productsModel);
         productsTable.setFont(Theme.FONT_BODY);
-        productsTable.setRowHeight(34);
+        productsTable.setRowHeight(38);
         productsTable.getTableHeader().setFont(Theme.FONT_HEADING);
         productsTable.getTableHeader().setBackground(Theme.PRIMARY);
         productsTable.getTableHeader().setForeground(Theme.WHITE);
@@ -105,7 +105,7 @@ public class SellerDashboard extends JFrame {
                 this::confirmAndDeleteProduct);
         productsTable.getColumnModel().getColumn(6).setCellRenderer(actionsCell);
         productsTable.getColumnModel().getColumn(6).setCellEditor(actionsCell);
-        productsTable.getColumnModel().getColumn(6).setPreferredWidth(220);
+        productsTable.getColumnModel().getColumn(6).setPreferredWidth(240);
 
         p.add(new JScrollPane(productsTable), BorderLayout.CENTER);
         return p;
