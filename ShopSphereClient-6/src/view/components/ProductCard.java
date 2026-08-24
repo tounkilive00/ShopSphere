@@ -1,7 +1,7 @@
 /*
- * ShopSphere - ProductCard v2.0
- * Carte produit premium : glassmorphisme léger, animations de survol fluides,
- * badge discount dynamique, étoiles de notation, quick-actions.
+ * ShopSphere - ProductCard v3.0
+ * Design premium : grande image cover, gradient overlay, badge promo stylé,
+ * section info épurée, animation hover fluide.
  */
 package view.components;
 
@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,113 +17,132 @@ import model.Product;
 import view.theme.Theme;
 
 /**
- * Carte produit e-commerce premium v2.
+ * Carte produit e-commerce premium v3 — grande image, design épuré.
  * @author ShopSphere
  */
 public class ProductCard extends JPanel {
 
+    private static final int IMG_H   = 200;  // hauteur image — bien plus grande
+    private static final int CARD_W  = 220;
+    private static final int RADIUS  = 16;
+
     private final Product product;
-    private float hoverProgress = 0f;  // 0.0 → 1.0 pour animation fluide
+    private float hoverProgress = 0f;
     private Timer hoverTimer;
+
+    // Cache image pour éviter de recharger à chaque repaint
+    private BufferedImage cachedImage = null;
+    private boolean imageLoaded = false;
 
     public ProductCard(Product product, Consumer<Product> onAddToCart,
                        Consumer<Product> onDetails) {
         this.product = product;
         setLayout(new BorderLayout());
-        setPreferredSize(new Dimension(Theme.CARD_W, Theme.CARD_H + 30));
+        setPreferredSize(new Dimension(CARD_W, CARD_W + 160));
         setOpaque(false);
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // ── Zone image ────────────────────────────────────────────────────
+        // Charger l'image en arrière-plan pour ne pas bloquer l'EDT
+        loadImageAsync();
+
+        // ── Zone image avec overlay gradient ──────────────────────────────
         JPanel imgPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,   RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_RENDERING,       RenderingHints.VALUE_RENDER_QUALITY);
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,  RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
-                Color catColor = getCategoryColor(product.getCategory());
-                Color catDark  = catColor.darker();
+                int w = getWidth(), h = getHeight();
 
-                // Dégradé diagonal
-                GradientPaint gp = new GradientPaint(0, 0, catColor,
-                        getWidth(), getHeight(), catDark);
-                g2.setPaint(gp);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                // ── Fond couleur catégorie ───────────────────────────────
+                Color base = getCategoryColor(product.getCategory());
+                GradientPaint bg = new GradientPaint(0, 0, base.brighter(),
+                        w, h, base.darker());
+                g2.setPaint(bg);
+                g2.fillRoundRect(0, 0, w, h, RADIUS, RADIUS);
 
-                // Pattern géométrique subtil
-                g2.setColor(new Color(255, 255, 255, 18));
-                g2.fillOval(getWidth() - 60, -20, 90, 90);
-                g2.fillOval(-20, getHeight() - 50, 70, 70);
+                // ── Décoration géométrique subtile (seulement si pas d'image) ──
+                if (cachedImage == null) {
+                    g2.setColor(new Color(255, 255, 255, 25));
+                    g2.fillOval(w - 80, -30, 130, 130);
+                    g2.fillOval(-30, h - 60, 100, 100);
 
-                // Image du produit (URL web ou fichier local) si fournie par le vendeur
-                boolean imageDrawn = false;
-                if (product.getImageUrl() != null && !product.getImageUrl().trim().isEmpty()) {
-                    try {
-                        String urlStr = product.getImageUrl().trim();
-                        Image img = null;
-                        if (urlStr.startsWith("http://") || urlStr.startsWith("https://")) {
-                            img = javax.imageio.ImageIO.read(new java.net.URL(urlStr));
-                        } else {
-                            java.io.File file = new java.io.File(urlStr);
-                            if (file.exists()) {
-                                img = javax.imageio.ImageIO.read(file);
-                            }
-                        }
-                        if (img != null) {
-                            Shape clip = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 12, 12);
-                            g2.setClip(clip);
-                            g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
-                            g2.setClip(null);
-                            imageDrawn = true;
-                        }
-                    } catch (Exception ignored) {}
-                }
-
-                if (!imageDrawn) {
-                    // Fallback : Icone emoji produit par catégorie
+                    // Icône centrale grande
                     String icon = getCategoryIcon(product.getCategory());
-                    g2.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 48));
+                    g2.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 72));
                     FontMetrics fm = g2.getFontMetrics();
                     int iw = fm.stringWidth(icon);
-                    g2.drawString(icon, (getWidth() - iw) / 2,
-                            getHeight() / 2 + fm.getAscent() / 2 - 4);
+                    int ih = fm.getAscent();
+                    // Légère ombre portée de l'emoji
+                    g2.setColor(new Color(0, 0, 0, 40));
+                    g2.drawString(icon, (w - iw) / 2 + 2, (h + ih) / 2 - ih / 4 + 2);
+                    g2.setColor(new Color(0, 0, 0, 180));
+                    g2.drawString(icon, (w - iw) / 2, (h + ih) / 2 - ih / 4);
                 }
 
-                // Badge PROMO avec discount %
+                // ── Image produit (cover) ────────────────────────────────
+                if (cachedImage != null) {
+                    // Calcul cover : redimensionner pour remplir sans déformer
+                    double scaleX = (double) w / cachedImage.getWidth();
+                    double scaleY = (double) h / cachedImage.getHeight();
+                    double scale  = Math.max(scaleX, scaleY);
+                    int dw = (int)(cachedImage.getWidth()  * scale);
+                    int dh = (int)(cachedImage.getHeight() * scale);
+                    int dx = (w - dw) / 2;
+                    int dy = (h - dh) / 2;
+
+                    Shape clip = new RoundRectangle2D.Float(0, 0, w, h, RADIUS, RADIUS);
+                    g2.setClip(clip);
+                    g2.drawImage(cachedImage, dx, dy, dw, dh, null);
+                    g2.setClip(null);
+                }
+
+                // ── Gradient overlay bas (scrim) pour lisibilité ─────────
+                GradientPaint scrim = new GradientPaint(
+                        0, h - 60, new Color(0, 0, 0, 0),
+                        0, h,      new Color(0, 0, 0, 120));
+                g2.setPaint(scrim);
+                g2.fillRoundRect(0, 0, w, h, RADIUS, RADIUS);
+
+                // ── Badge PROMO ──────────────────────────────────────────
                 if (product.isOnSale() && product.getBasePrice() > 0) {
-                    int discount = (int) ((1 - product.getSalePrice() / product.getBasePrice()) * 100);
-                    String badge = "-" + discount + "%";
+                    int pct = (int)((1 - product.getSalePrice() / product.getBasePrice()) * 100);
+                    String badge = "-" + pct + "%";
+                    int bw = 52, bh = 26;
                     g2.setColor(new Color(0xDC, 0x26, 0x26));
-                    g2.fillRoundRect(8, 8, 52, 24, 8, 8);
-                    g2.setFont(new Font("SansSerif", Font.BOLD, 11));
+                    g2.fillRoundRect(10, 10, bw, bh, 10, 10);
+                    g2.setFont(new Font("Segoe UI", Font.BOLD, 12));
                     g2.setColor(Color.WHITE);
                     FontMetrics bfm = g2.getFontMetrics();
-                    g2.drawString(badge, 8 + (52 - bfm.stringWidth(badge)) / 2, 24);
+                    g2.drawString(badge,
+                            10 + (bw - bfm.stringWidth(badge)) / 2,
+                            10 + bh / 2 + bfm.getAscent() / 2 - 2);
                 }
 
-                // Overlay rupture de stock
+                // ── Overlay rupture de stock ─────────────────────────────
                 if (!product.isInStock()) {
-                    g2.setColor(new Color(0, 0, 0, 110));
-                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
-                    g2.setFont(new Font("SansSerif", Font.BOLD, 13));
-                    g2.setColor(Color.WHITE);
+                    g2.setColor(new Color(0, 0, 0, 130));
+                    g2.fillRoundRect(0, 0, w, h, RADIUS, RADIUS);
                     String oos = "Rupture de stock";
+                    g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                    g2.setColor(Color.WHITE);
                     FontMetrics fm2 = g2.getFontMetrics();
-                    g2.drawString(oos, (getWidth() - fm2.stringWidth(oos)) / 2,
-                            getHeight() / 2 + 6);
+                    g2.drawString(oos, (w - fm2.stringWidth(oos)) / 2, h / 2 + 6);
                 }
 
-                // Hover overlay
+                // ── Hover highlight ──────────────────────────────────────
                 if (hoverProgress > 0) {
-                    g2.setColor(new Color(255, 255, 255, (int)(hoverProgress * 20)));
-                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
+                    g2.setColor(new Color(255, 255, 255, (int)(hoverProgress * 25)));
+                    g2.fillRoundRect(0, 0, w, h, RADIUS, RADIUS);
                 }
+
                 g2.dispose();
             }
         };
-        imgPanel.setPreferredSize(new Dimension(Theme.CARD_W, 150));
+        imgPanel.setPreferredSize(new Dimension(CARD_W, IMG_H));
         imgPanel.setOpaque(false);
-        imgPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         imgPanel.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
                 if (onDetails != null) onDetails.accept(product);
@@ -133,95 +153,108 @@ public class ProductCard extends JPanel {
         JPanel info = new JPanel();
         info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
         info.setOpaque(false);
-        info.setBorder(new EmptyBorder(10, 12, 12, 12));
+        info.setBorder(new EmptyBorder(12, 14, 14, 14));
 
         // Catégorie pill
         if (product.getCategory() != null) {
             JLabel catLbl = new JLabel(product.getCategory().name());
-            catLbl.setFont(Theme.FONT_CAPTION);
+            catLbl.setFont(new Font("Segoe UI", Font.BOLD, 9));
             catLbl.setForeground(Theme.PRIMARY);
             catLbl.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(Theme.LIGHT_GREY, 1, true),
-                    BorderFactory.createEmptyBorder(2, 6, 2, 6)));
+                    BorderFactory.createLineBorder(new Color(0x1A, 0x3C, 0x5E, 60), 1, true),
+                    BorderFactory.createEmptyBorder(2, 8, 2, 8)));
             catLbl.setOpaque(true);
-            catLbl.setBackground(Theme.NEUTRAL);
+            catLbl.setBackground(new Color(0x1A, 0x3C, 0x5E, 15));
             catLbl.setAlignmentX(LEFT_ALIGNMENT);
             info.add(catLbl);
-            info.add(Box.createVerticalStrut(5));
+            info.add(Box.createVerticalStrut(7));
         }
 
-        // Titre
+        // Titre produit
         String titleStr = product.getTitle();
-        if (titleStr != null && titleStr.length() > 32) titleStr = titleStr.substring(0, 29) + "…";
+        if (titleStr != null && titleStr.length() > 30) titleStr = titleStr.substring(0, 27) + "…";
         JLabel titleLbl = new JLabel("<html><b>" + titleStr + "</b></html>");
-        titleLbl.setFont(Theme.FONT_HEADING);
+        titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
         titleLbl.setForeground(Theme.DARK_TEXT);
         titleLbl.setAlignmentX(LEFT_ALIGNMENT);
         info.add(titleLbl);
-        info.add(Box.createVerticalStrut(2));
+        info.add(Box.createVerticalStrut(3));
 
         // Vendeur
         if (product.getSeller() != null) {
             JLabel sellerLbl = new JLabel("par " + product.getSeller().getFullName());
-            sellerLbl.setFont(Theme.FONT_SMALL);
+            sellerLbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             sellerLbl.setForeground(Theme.GREY_TEXT);
             sellerLbl.setAlignmentX(LEFT_ALIGNMENT);
             info.add(sellerLbl);
-            info.add(Box.createVerticalStrut(6));
+            info.add(Box.createVerticalStrut(8));
         }
 
-        // Prix
-        JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        // Prix — plus grand et plus visible
+        JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         pricePanel.setOpaque(false);
         pricePanel.setAlignmentX(LEFT_ALIGNMENT);
         if (product.isOnSale()) {
-            JLabel saleLbl = new JLabel(String.format("%.2f FCFA", product.getSalePrice()));
-            saleLbl.setFont(Theme.FONT_PRICE);
-            saleLbl.setForeground(Theme.ERROR);
+            JLabel saleLbl = new JLabel(String.format("%.0f FCFA", product.getSalePrice()));
+            saleLbl.setFont(new Font("Segoe UI", Font.BOLD, 17));
+            saleLbl.setForeground(new Color(0xDC, 0x26, 0x26));
             JLabel baseLbl = new JLabel("<html><strike>" +
-                    String.format("%.0f FCFA", product.getBasePrice()) + "</strike></html>");
-            baseLbl.setFont(Theme.FONT_SMALL);
+                    String.format("%.0f", product.getBasePrice()) + "</strike></html>");
+            baseLbl.setFont(new Font("Segoe UI", Font.PLAIN, 11));
             baseLbl.setForeground(Theme.GREY_TEXT);
             pricePanel.add(saleLbl);
             pricePanel.add(baseLbl);
         } else {
-            JLabel priceLbl = new JLabel(String.format("%.2f FCFA", product.getBasePrice()));
-            priceLbl.setFont(Theme.FONT_PRICE);
+            JLabel priceLbl = new JLabel(String.format("%.0f FCFA", product.getBasePrice()));
+            priceLbl.setFont(new Font("Segoe UI", Font.BOLD, 17));
             priceLbl.setForeground(Theme.PRIMARY);
             pricePanel.add(priceLbl);
         }
         info.add(pricePanel);
-        info.add(Box.createVerticalStrut(6));
+        info.add(Box.createVerticalStrut(10));
 
-        // Stock indicator
-        JLabel stockLbl = new JLabel(product.isInStock()
-                ? "✔  En stock"
-                : "✖  Rupture");
-        stockLbl.setFont(Theme.FONT_SMALL);
-        stockLbl.setForeground(product.isInStock() ? Theme.SUCCESS : Theme.ERROR);
-        stockLbl.setAlignmentX(LEFT_ALIGNMENT);
-        info.add(stockLbl);
-        info.add(Box.createVerticalStrut(8));
-
-        // Bouton panier amélioré
+        // Bouton panier full-width
         AccentButton cartBtn = new AccentButton(
                 product.isInStock() ? "🛒  Ajouter au panier" : "Indisponible",
-                Theme.CARD_W - 24, Theme.BTN_H_SM);
+                CARD_W - 28, 36);
         cartBtn.setEnabled(product.isInStock());
-        cartBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, Theme.BTN_H_SM));
+        cartBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         cartBtn.setAlignmentX(LEFT_ALIGNMENT);
         cartBtn.addActionListener(e -> { if (onAddToCart != null) onAddToCart.accept(product); });
         info.add(cartBtn);
 
         add(imgPanel, BorderLayout.NORTH);
-        add(info, BorderLayout.CENTER);
+        add(info,     BorderLayout.CENTER);
 
-        // ── Animations hover ──────────────────────────────────────────────
+        // ── Hover animation ───────────────────────────────────────────────
         addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) { animateHover(true); }
+            @Override public void mouseEntered(MouseEvent e) { animateHover(true);  }
             @Override public void mouseExited (MouseEvent e) { animateHover(false); }
-            @Override public void mouseClicked(MouseEvent e) { if (onDetails != null) onDetails.accept(product); }
+            @Override public void mouseClicked(MouseEvent e) {
+                if (onDetails != null) onDetails.accept(product);
+            }
         });
+    }
+
+    /** Charge l'image du produit en arrière-plan (non-bloquant). */
+    private void loadImageAsync() {
+        if (product.getImageUrl() == null || product.getImageUrl().trim().isEmpty()) return;
+        new Thread(() -> {
+            try {
+                String url = product.getImageUrl().trim();
+                BufferedImage img;
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    img = javax.imageio.ImageIO.read(new java.net.URL(url));
+                } else {
+                    java.io.File f = new java.io.File(url);
+                    img = f.exists() ? javax.imageio.ImageIO.read(f) : null;
+                }
+                if (img != null) {
+                    cachedImage = img;
+                    SwingUtilities.invokeLater(this::repaint);
+                }
+            } catch (Exception ignored) {}
+        }).start();
     }
 
     private void animateHover(boolean enter) {
@@ -229,8 +262,8 @@ public class ProductCard extends JPanel {
         hoverTimer = new Timer(16, null);
         hoverTimer.addActionListener(e -> {
             hoverProgress = enter
-                    ? Math.min(1f, hoverProgress + 0.08f)
-                    : Math.max(0f, hoverProgress - 0.08f);
+                    ? Math.min(1f, hoverProgress + 0.10f)
+                    : Math.max(0f, hoverProgress - 0.10f);
             repaint();
             if ((enter && hoverProgress >= 1f) || (!enter && hoverProgress <= 0f))
                 ((Timer) e.getSource()).stop();
@@ -246,49 +279,49 @@ public class ProductCard extends JPanel {
         int w = getWidth(), h = getHeight();
         float elevate = hoverProgress;
 
-        // Ombre portée dynamique
-        int shadowSize  = (int)(2 + elevate * 6);
-        int shadowAlpha = (int)(20 + elevate * 30);
-        for (int i = shadowSize; i > 0; i--) {
-            g2.setColor(new Color(0x1A, 0x3C, 0x5E, shadowAlpha / i));
-            g2.fillRoundRect(i, i + 2, w - i, h - i, 16, 16);
+        // Ombre portée dynamique multi-couches
+        int shadowLayers = (int)(3 + elevate * 6);
+        for (int i = shadowLayers; i > 0; i--) {
+            int alpha = (int)((15 + elevate * 25) / i);
+            g2.setColor(new Color(0x1A, 0x3C, 0x5E, Math.max(1, alpha)));
+            g2.fillRoundRect(i, i + 3, w - i * 2, h - i, RADIUS + 2, RADIUS + 2);
         }
 
-        // Fond blanc arrondi
+        // Fond blanc card
         g2.setColor(Theme.BG_CARD);
-        g2.fill(new RoundRectangle2D.Float(0, 0, w - shadowSize - 1,
-                h - shadowSize - 1, Theme.BORDER_RADIUS, Theme.BORDER_RADIUS));
+        g2.fill(new RoundRectangle2D.Float(0, 0, w - shadowLayers - 1,
+                h - shadowLayers - 1, RADIUS, RADIUS));
 
-        // Bordure accent dorée au survol
-        if (hoverProgress > 0.1f) {
-            float alpha = Math.min(1f, hoverProgress * 1.5f);
+        // Bordure hover ambre
+        if (hoverProgress > 0.05f) {
+            float alpha = Math.min(1f, hoverProgress * 2f);
             g2.setColor(new Color(Theme.ACCENT.getRed(), Theme.ACCENT.getGreen(),
-                    Theme.ACCENT.getBlue(), (int)(alpha * 200)));
-            g2.setStroke(new BasicStroke(1.5f));
-            g2.draw(new RoundRectangle2D.Float(0.75f, 0.75f,
-                    w - shadowSize - 2.5f, h - shadowSize - 2.5f,
-                    Theme.BORDER_RADIUS - 1, Theme.BORDER_RADIUS - 1));
+                    Theme.ACCENT.getBlue(), (int)(alpha * 220)));
+            g2.setStroke(new BasicStroke(2f));
+            g2.draw(new RoundRectangle2D.Float(1f, 1f,
+                    w - shadowLayers - 3f, h - shadowLayers - 3f,
+                    RADIUS - 1, RADIUS - 1));
         }
 
         g2.dispose();
         super.paintComponent(g);
     }
 
-    // Couleurs de fond image par catégorie
+    // ── Helpers couleur / icône ───────────────────────────────────────────
     private Color getCategoryColor(Product.Category cat) {
-        if (cat == null) return new Color(0xE8, 0xEE, 0xF6);
+        if (cat == null) return new Color(0xC8, 0xD8, 0xE8);
         switch (cat) {
-            case ELECTRONIQUE: return new Color(0xBF, 0xDB, 0xFF);
-            case MODE:         return new Color(0xFF, 0xD6, 0xEE);
-            case MAISON:       return new Color(0xC8, 0xF0, 0xC8);
-            case SPORT:        return new Color(0xFF, 0xE4, 0xC0);
-            case BEAUTE:       return new Color(0xFF, 0xD0, 0xED);
-            case ALIMENTATION: return new Color(0xD4, 0xF5, 0xB4);
-            case LIVRES:       return new Color(0xFF, 0xF0, 0xB0);
-            case JOUETS:       return new Color(0xF0, 0xD0, 0xFF);
-            case AUTOMOBILES:  return new Color(0xC8, 0xE8, 0xFF);
-            case SANTE:        return new Color(0xD0, 0xF0, 0xE0);
-            default:           return new Color(0xEA, 0xEE, 0xF4);
+            case ELECTRONIQUE: return new Color(0x5B, 0xA3, 0xD9);
+            case MODE:         return new Color(0xE8, 0x7A, 0xA8);
+            case MAISON:       return new Color(0x60, 0xB8, 0x78);
+            case SPORT:        return new Color(0xF0, 0xA0, 0x30);
+            case BEAUTE:       return new Color(0xC8, 0x70, 0xD0);
+            case ALIMENTATION: return new Color(0x78, 0xC8, 0x50);
+            case LIVRES:       return new Color(0xE0, 0xB0, 0x40);
+            case JOUETS:       return new Color(0xA0, 0x70, 0xE0);
+            case AUTOMOBILES:  return new Color(0x50, 0x98, 0xD8);
+            case SANTE:        return new Color(0x40, 0xC0, 0x90);
+            default:           return new Color(0x90, 0xA8, 0xC0);
         }
     }
 
