@@ -28,18 +28,24 @@ public class Server {
 
     public static void main(String[] args) {
         try {
-            System.out.println("==============================================");
-            System.out.println("  Initialisation de ShopSphere Server...");
-            System.out.println("==============================================");
+            // Silence Hibernate, JBoss, SLF4J, and PostgreSQL logging noise
+            System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "off");
+            System.setProperty("org.jboss.logging.provider", "jdk");
+            
+            java.util.logging.LogManager.getLogManager().reset();
+            java.util.logging.Logger globalLogger = java.util.logging.Logger.getLogger("");
+            globalLogger.setLevel(java.util.logging.Level.OFF);
+            for (java.util.logging.Handler handler : globalLogger.getHandlers()) {
+                globalLogger.removeHandler(handler);
+            }
 
             // 1. Warm up Hibernate SessionFactory in background for instant response
             new Thread(() -> {
                 try {
                     HibernateUtil.getSessionFactory();
-                    System.out.println("✔ Hibernate SessionFactory prêt.");
                     ensureAdminUser();
                 } catch (Exception e) {
-                    System.err.println("⚠ Hibernate pre-warm warning: " + e.getMessage());
+                    // silent
                 }
             }).start();
 
@@ -65,14 +71,12 @@ public class Server {
             registry.rebind("NotificationService", notifService);
             registry.rebind("CategoryService",     categoryService);
 
-            System.out.println("✔ Services RMI enregistrés avec succès.");
-            System.out.println("==============================================");
-            System.out.println("🚀 Serveur RMI ShopSphere démarré sur le port " + RMI_PORT);
-            System.out.println("==============================================");
+            System.out.println("==================================================");
+            System.out.println("   ShopSphere RMI Server started on port " + RMI_PORT);
+            System.out.println("==================================================");
 
         } catch (Exception ex) {
             System.err.println("Server failed to start: " + ex.getMessage());
-            ex.printStackTrace();
         }
     }
 
@@ -94,17 +98,15 @@ public class Server {
                 admin.setPhoneVerified(true);
                 admin.setPreferredLanguage("fr");
                 userDao.createUser(admin);
-                System.out.println("✔ Compte Admin initialisé : " + adminEmail + " / " + adminPassword);
             } else {
                 existingUser.setRole(User.Role.ADMIN);
                 existingUser.setStatus(User.AccountStatus.ACTIVE);
                 existingUser.setEmailVerified(true);
                 existingUser.setPasswordHash(PasswordUtil.hash(adminPassword));
                 userDao.updateUser(existingUser);
-                System.out.println("✔ Compte Admin mis à jour : " + adminEmail);
             }
         } catch (Exception e) {
-            System.err.println("⚠ Impossible d'assurer le compte Admin: " + e.getMessage());
+            // silent
         }
     }
 }

@@ -13,7 +13,7 @@
 
         <!-- ── Schema management & SQL options ──────────────────────────── -->
         <property name="hibernate.hbm2ddl.auto">update</property>
-        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.show_sql">false</property>
         <property name="hibernate.format_sql">false</property>
 
         <!-- ── Connection Pool ─────────────────────────────────────────── -->
@@ -29,5 +29,7 @@
         <mapping class="model.OtpRecord"/>
         <mapping class="model.Product"/>
         <mapping class="model.User"/>
+        <mapping class="dao.LocalDateConverter"/>
+        <mapping class="dao.LocalDateTimeConverter"/>
     </session-factory>
 </hibernate-configuration>
