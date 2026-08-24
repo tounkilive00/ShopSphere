@@ -3,8 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans-6/ShopSphere_NetBeans-6/ShopSphereClient-6/src/view/UserProfile.java</file>
-            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans-6/ShopSphere_NetBeans-6/ShopSphereClient-6/src/view/UserLogin.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans-6/ShopSphereClient-6/src/view/RegisterUser.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans-6/ShopSphereClient-6/src/view/UserLogin.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans-6/ShopSphereClient-6/src/view/Session.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans-6/ShopSphereClient-6/src/view/UserProfile.java</file>
+            <file>file:/C:/Users/hf/Documents/Coding/ShopSphere_NetBeans-6/ShopSphereClient-6/src/view/OtpVerification.java</file>
         </group>
     </open-files>
 </project-private>
