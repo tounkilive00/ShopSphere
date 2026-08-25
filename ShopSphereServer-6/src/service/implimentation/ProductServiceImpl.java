@@ -32,13 +32,21 @@ public class ProductServiceImpl extends UnicastRemoteObject implements ProductSe
         if (productObj.getSeller() == null) {
             throw new RemoteException("Un produit doit avoir un vendeur.");
         }
-        return productDao.createProduct(productObj);
+        Product created = productDao.createProduct(productObj);
+        if (created == null) {
+            throw new RemoteException("Échec de la sauvegarde du produit dans la base de données. Vérifiez les logs serveur.");
+        }
+        return created;
     }
 
     /** Etait updateProductRecord() dans AgriConnect */
     @Override
     public Product updateProductRecord(Product productObj) throws RemoteException {
-        return productDao.updateProduct(productObj);
+        Product updated = productDao.updateProduct(productObj);
+        if (updated == null) {
+            throw new RemoteException("Échec de la mise à jour du produit dans la base de données.");
+        }
+        return updated;
     }
 
     /** Etait deleteProductRecord() dans AgriConnect — soft delete vers ARCHIVE */

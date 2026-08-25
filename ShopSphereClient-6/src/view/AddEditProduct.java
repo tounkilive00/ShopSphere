@@ -42,7 +42,7 @@ public class AddEditProduct extends JFrame {
     }
 
     public AddEditProduct(User user, Product product, Runnable onSave, Runnable onCancel) {
-        this.currentUser = user;
+        this.currentUser = user != null ? user : Session.getCurrentUser();
         this.editProduct = product;
         this.onSave      = onSave;
         this.onCancel    = onCancel;
@@ -212,32 +212,58 @@ public class AddEditProduct extends JFrame {
 
         final double fp = price, fsp = salePrice;
         final int fstock = stock;
-        final String imgUrl = imageUrlField.getText().trim();
+
+        String brandRaw = brandField.getText().trim();
+        final String brand = brandRaw.isEmpty() ? null : brandRaw;
+
+        String skuRaw = skuField.getText().trim();
+        final String sku = skuRaw.isEmpty() ? null : skuRaw;
+
+        String imgUrlRaw = imageUrlField.getText().trim();
+        final String imgUrl = imgUrlRaw.isEmpty() ? null : imgUrlRaw;
+
+        String descRaw = descArea.getText().trim();
+        final String desc = descRaw.isEmpty() ? null : descRaw;
+
+        User sellerToUse = currentUser != null ? currentUser : Session.getCurrentUser();
+        if (sellerToUse == null) {
+            showError("Aucun utilisateur connecté pour la publication."); return;
+        }
+
         saveBtn.setEnabled(false); saveBtn.setText("Enregistrement...");
 
         SwingWorker<Product, Void> worker = new SwingWorker<Product, Void>() {
             @Override protected Product doInBackground() throws Exception {
                 if (productService == null) { connectToServer(); }
                 if (productService == null) {
-                    throw new Exception("Cannot connect to server.");
+                    throw new Exception("Impossible de se connecter au serveur RMI. Vérifiez qu'il est en cours d'exécution.");
                 }
                 Product p = editProduct != null ? editProduct : new Product();
                 p.setTitle(title);
-                p.setBrand(brandField.getText().trim());
-                p.setSku(skuField.getText().trim());
+                p.setBrand(brand);
+                p.setSku(sku);
                 p.setCategory((Category) categoryBox.getSelectedItem());
                 p.setBasePrice(fp); p.setSalePrice(fsp); p.setStockQty(fstock);
                 p.setImageUrl(imgUrl);
-                p.setDescription(descArea.getText().trim());
-                p.setSeller(currentUser);
+                p.setDescription(desc);
+                p.setSeller(sellerToUse);
                 p.setStatus(Product.ProductStatus.ACTIF);
-                return editProduct == null ? productService.createProductRecord(p) : productService.updateProductRecord(p);
+                
+                Product result = editProduct == null ? productService.createProductRecord(p) : productService.updateProductRecord(p);
+                if (result == null) {
+                    throw new Exception("La sauvegarde du produit a échoué dans la base de données.");
+                }
+                return result;
             }
             @Override protected void done() {
                 saveBtn.setEnabled(true);
                 saveBtn.setText(editProduct == null ? "Publier le produit" : "Enregistrer les modifications");
                 try {
-                    get();
+                    Product result = get();
+                    if (result == null) {
+                        showError("Erreur : Le produit n'a pas pu être enregistré.");
+                        return;
+                    }
                     JOptionPane.showMessageDialog(AddEditProduct.this,
                         editProduct == null ? "Produit publié avec succès !" : "Produit mis à jour !",
                         "Succès", JOptionPane.INFORMATION_MESSAGE);

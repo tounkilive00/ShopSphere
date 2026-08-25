@@ -25,6 +25,18 @@ public class ProductDao {
         try {
             ss = HibernateUtil.getSessionFactory().openSession();
             tr = ss.beginTransaction();
+            if (productObj.getSeller() != null && productObj.getSeller().getId() > 0) {
+                model.User dbSeller = (model.User) ss.get(model.User.class, productObj.getSeller().getId());
+                if (dbSeller != null) {
+                    productObj.setSeller(dbSeller);
+                }
+            }
+            if (productObj.getCategoryRef() != null && productObj.getCategoryRef().getId() > 0) {
+                model.Category dbCat = (model.Category) ss.get(model.Category.class, productObj.getCategoryRef().getId());
+                if (dbCat != null) {
+                    productObj.setCategoryRef(dbCat);
+                }
+            }
             ss.save(productObj);
             tr.commit();
             return productObj;
@@ -44,9 +56,21 @@ public class ProductDao {
         try {
             ss = HibernateUtil.getSessionFactory().openSession();
             tr = ss.beginTransaction();
-            ss.update(productObj);
+            if (productObj.getSeller() != null && productObj.getSeller().getId() > 0) {
+                model.User dbSeller = (model.User) ss.get(model.User.class, productObj.getSeller().getId());
+                if (dbSeller != null) {
+                    productObj.setSeller(dbSeller);
+                }
+            }
+            if (productObj.getCategoryRef() != null && productObj.getCategoryRef().getId() > 0) {
+                model.Category dbCat = (model.Category) ss.get(model.Category.class, productObj.getCategoryRef().getId());
+                if (dbCat != null) {
+                    productObj.setCategoryRef(dbCat);
+                }
+            }
+            Product merged = (Product) ss.merge(productObj);
             tr.commit();
-            return productObj;
+            return merged;
         } catch (Exception ex) {
             if (tr != null && tr.isActive()) tr.rollback();
             ex.printStackTrace();
@@ -74,9 +98,12 @@ public class ProductDao {
         try {
             ss = HibernateUtil.getSessionFactory().openSession();
             tr = ss.beginTransaction();
-            ss.delete(productObj);
+            Product managed = (Product) ss.get(Product.class, productObj.getId());
+            if (managed != null) {
+                ss.delete(managed);
+            }
             tr.commit();
-            return productObj;
+            return managed != null ? managed : productObj;
         } catch (Exception ex) {
             if (tr != null && tr.isActive()) tr.rollback();
             ex.printStackTrace();
