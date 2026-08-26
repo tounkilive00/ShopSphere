@@ -31,6 +31,7 @@ public class Order implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Convert(converter = dao.LocalDateConverter.class)
     @Column(name = "order_date", nullable = false)
     private LocalDate orderDate;
 

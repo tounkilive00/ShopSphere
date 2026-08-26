@@ -28,6 +28,7 @@ public class Server {
 
     public static void main(String[] args) {
         try {
+            System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
             // Silence Hibernate, JBoss, SLF4J, and PostgreSQL logging noise
             System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "off");
             System.setProperty("org.jboss.logging.provider", "jdk");

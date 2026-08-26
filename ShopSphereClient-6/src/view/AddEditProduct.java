@@ -128,6 +128,7 @@ public class AddEditProduct extends JFrame {
         SecondaryButton browseBtn = new SecondaryButton("Parcourir...");
         browseBtn.setPreferredSize(new Dimension(110, Theme.FIELD_H));
         browseBtn.addActionListener(e -> {
+            System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Sélectionner une photo de produit");
             chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Images", "jpg", "jpeg", "png", "webp", "gif"));

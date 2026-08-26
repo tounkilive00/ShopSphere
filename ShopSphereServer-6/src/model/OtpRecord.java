@@ -46,6 +46,7 @@ public class OtpRecord implements Serializable {
     @Column(name = "code_hash", nullable = false)
     private String codeHash;
 
+    @Convert(converter = dao.LocalDateTimeConverter.class)
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
@@ -58,6 +59,7 @@ public class OtpRecord implements Serializable {
     @Column(name = "ip_address")
     private String ipAddress;
 
+    @Convert(converter = dao.LocalDateTimeConverter.class)
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 

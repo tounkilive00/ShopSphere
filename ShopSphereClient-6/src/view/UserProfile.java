@@ -270,6 +270,7 @@ public class UserProfile extends JFrame {
 
     /** Ouvre un sélecteur de fichier et met à jour l'avatar. */
     private void pickProfilePicture() {
+        System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Choisir une photo de profil");
         chooser.setFileFilter(new FileNameExtensionFilter(

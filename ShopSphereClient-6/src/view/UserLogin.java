@@ -328,7 +328,12 @@ public class UserLogin extends JFrame {
         @Override public boolean isBorderOpaque() { return false; }
     }
 
+    static {
+        System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+    }
+
     public static void main(String[] args) {
+        System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

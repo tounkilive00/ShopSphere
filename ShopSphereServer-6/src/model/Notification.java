@@ -39,6 +39,7 @@ public class Notification implements Serializable {
     @Column(name = "type")
     private TypeNotif type; // etait String type dans AgriConnect
 
+    @Convert(converter = dao.LocalDateTimeConverter.class)
     @Column(name = "timestamp", nullable = false) // meme champ qu'AgriConnect
     private LocalDateTime timestamp = LocalDateTime.now();
 
