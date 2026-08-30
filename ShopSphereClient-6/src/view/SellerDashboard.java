@@ -95,6 +95,7 @@ public class SellerDashboard extends JFrame {
         productsTable.getTableHeader().setFont(Theme.FONT_HEADING);
         productsTable.getTableHeader().setBackground(Theme.PRIMARY);
         productsTable.getTableHeader().setForeground(Theme.WHITE);
+        Theme.styleTable(productsTable);
 
         // Colonne Actions cliquable — design fourni par view.components.ProductActionsCell,
         // logique metier (appels RMI) fournie ici via les callbacks.
@@ -178,6 +179,7 @@ public class SellerDashboard extends JFrame {
         table.getTableHeader().setFont(Theme.FONT_HEADING);
         table.getTableHeader().setBackground(Theme.PRIMARY);
         table.getTableHeader().setForeground(Theme.WHITE);
+        Theme.styleTable(table);
         p.add(new JScrollPane(table), BorderLayout.CENTER);
 
         // Pied de page revenus

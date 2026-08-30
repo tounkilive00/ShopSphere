@@ -247,17 +247,17 @@ public class MarketPlace extends JFrame {
         sidebar.add(Box.createVerticalStrut(8));
 
         String[][] categories = {
-            {"Tous",          "🏪"},
-            {"Electronique",  "📱"},
-            {"Mode",          "👗"},
-            {"Maison",        "🏠"},
-            {"Sport",         "⚽"},
-            {"Beaute",        "💄"},
-            {"Alimentation",  "🛒"},
-            {"Livres",        "📚"},
-            {"Jouets",        "🎮"},
-            {"Automobiles",   "🚗"},
-            {"Sante",         "💊"}
+            {"Tous",          "•"},
+            {"Electronique",  "•"},
+            {"Mode",          "•"},
+            {"Maison",        "•"},
+            {"Sport",         "•"},
+            {"Beaute",        "•"},
+            {"Alimentation",  "•"},
+            {"Livres",        "•"},
+            {"Jouets",        "•"},
+            {"Automobiles",   "•"},
+            {"Sante",         "•"}
         };
 
         for (String[] cat : categories) {

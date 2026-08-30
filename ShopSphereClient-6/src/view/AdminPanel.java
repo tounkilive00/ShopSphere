@@ -58,14 +58,14 @@ public class AdminPanel extends JFrame {
         setLayout(new BorderLayout());
 
         // Header — design fourni par view.components.PageHeader (reutilisable)
-        PageHeader header = new PageHeader("🛡 Administration ShopSphere",
+        PageHeader header = new PageHeader("Administration ShopSphere",
                 "Utilisateurs, produits et commandes");
 
-        SecondaryButton refreshBtn = new SecondaryButton("🔄 Actualiser");
+        SecondaryButton refreshBtn = new SecondaryButton("Actualiser");
         refreshBtn.addActionListener(e -> loadAllData());
         header.addAction(refreshBtn);
 
-        SecondaryButton catalogBtn = new SecondaryButton("🛍 Voir le catalogue");
+        SecondaryButton catalogBtn = new SecondaryButton("Voir le catalogue");
         catalogBtn.addActionListener(e -> AppNavigator.show(new MarketPlace(adminUser)));
         header.addAction(catalogBtn);
 
@@ -74,9 +74,9 @@ public class AdminPanel extends JFrame {
         // Onglets
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(Theme.FONT_HEADING);
-        tabs.addTab("👥 Utilisateurs", buildUsersTab());
-        tabs.addTab("📦 Produits",     buildProductsTab());
-        tabs.addTab("🛒 Commandes",    buildOrdersTab());
+        tabs.addTab("Utilisateurs", buildUsersTab());
+        tabs.addTab("Produits",     buildProductsTab());
+        tabs.addTab("Commandes",    buildOrdersTab());
         add(tabs, BorderLayout.CENTER);
         
         setVisible(true);
@@ -460,17 +460,7 @@ public class AdminPanel extends JFrame {
     }
 
     private void styleTable(JTable t) {
-        t.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        t.setRowHeight(38);
-        t.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
-        t.getTableHeader().setBackground(Theme.PRIMARY);
-        t.getTableHeader().setForeground(Theme.WHITE);
-        t.getTableHeader().setPreferredSize(new Dimension(0, 36));
-        t.setGridColor(new Color(0xE2, 0xE8, 0xF0));
-        t.setShowHorizontalLines(true);
-        t.setShowVerticalLines(false);
-        t.setSelectionBackground(new Color(0xE0, 0xF2, 0xFE));
-        t.setSelectionForeground(Theme.DARK_TEXT);
+        Theme.styleTable(t);
     }
 
     private void loadAllData() {

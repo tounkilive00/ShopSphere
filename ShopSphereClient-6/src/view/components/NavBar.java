@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import model.User;
+import view.AdminPanel;
 import view.theme.Theme;
 
 /**
@@ -111,7 +112,7 @@ public class NavBar extends JPanel {
         });
         searchField.addActionListener(e -> triggerSearch(onSearch)); // Enter = immédiat
 
-        JButton searchBtn = new JButton("🔍") {
+        JButton searchBtn = new JButton("Rechercher") {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -122,13 +123,13 @@ public class NavBar extends JPanel {
                 super.paintComponent(g);
             }
         };
-        searchBtn.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
+        searchBtn.setFont(new Font("SansSerif", Font.PLAIN, 14));
         searchBtn.setForeground(Color.WHITE);
         searchBtn.setOpaque(false);
         searchBtn.setContentAreaFilled(false);
         searchBtn.setBorderPainted(false);
         searchBtn.setFocusPainted(false);
-        searchBtn.setPreferredSize(new Dimension(44, 32));
+        searchBtn.setPreferredSize(new Dimension(100, 32));
         searchBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         searchBtn.addActionListener(e -> triggerSearch(onSearch));
 
@@ -139,6 +140,35 @@ public class NavBar extends JPanel {
         // ── Actions droite ────────────────────────────────────────────────
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
         actions.setOpaque(false);
+
+        // Bouton Panneau d'administration si l'utilisateur est administrateur
+        if (user != null && user.isAdmin()) {
+            JButton adminBtn = new JButton("Administration") {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    Color bg = getModel().isRollover() ? Theme.ACCENT_DARK : Theme.ACCENT;
+                    g2.setColor(bg);
+                    g2.fillRoundRect(0, (getHeight() - 30) / 2, getWidth(), 30, 14, 14);
+                    g2.setFont(Theme.FONT_LABEL);
+                    g2.setColor(Theme.WHITE);
+                    FontMetrics fm = g2.getFontMetrics();
+                    g2.drawString(getText(), (getWidth() - fm.stringWidth(getText())) / 2,
+                            (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+                    g2.dispose();
+                }
+            };
+            adminBtn.setOpaque(false);
+            adminBtn.setContentAreaFilled(false);
+            adminBtn.setBorderPainted(false);
+            adminBtn.setFocusPainted(false);
+            adminBtn.setPreferredSize(new Dimension(135, Theme.NAVBAR_H));
+            adminBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            adminBtn.setToolTipText("Ouvrir le panneau d'administration");
+            adminBtn.addActionListener(e -> AppNavigator.show(new AdminPanel(user)));
+            actions.add(adminBtn);
+        }
 
         // Panier avec badge
         JPanel cartPanel = new JPanel(null);

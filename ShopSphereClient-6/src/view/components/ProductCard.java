@@ -215,7 +215,7 @@ public class ProductCard extends JPanel {
 
         // Bouton panier full-width
         AccentButton cartBtn = new AccentButton(
-                product.isInStock() ? "🛒  Ajouter au panier" : "Indisponible",
+                product.isInStock() ? "+  Ajouter au panier" : "Indisponible",
                 CARD_W - 28, 36);
         cartBtn.setEnabled(product.isInStock());
         cartBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));

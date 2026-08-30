@@ -79,6 +79,7 @@ public class OrderHistory extends JFrame {
         ordersTable.getTableHeader().setPreferredSize(new Dimension(0, 36));
         ordersTable.setSelectionBackground(new Color(0xE0, 0xF2, 0xFE));
         ordersTable.setSelectionForeground(Theme.DARK_TEXT);
+        Theme.styleTable(ordersTable);
 
         // Colorer les statuts
         ordersTable.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {

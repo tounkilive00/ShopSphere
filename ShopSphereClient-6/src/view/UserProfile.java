@@ -161,9 +161,9 @@ public class UserProfile extends JFrame {
         hc.add(Box.createVerticalStrut(4));
 
         // Badge rôle
-        String roleText = currentUser.isAdmin() ? "👑 Administrateur"
-                        : currentUser.isSeller() ? "🏪 Vendeur"
-                        : "🛍 Client";
+        String roleText = currentUser.isAdmin() ? "Administrateur"
+                        : currentUser.isSeller() ? "Vendeur"
+                        : "Client";
         JLabel roleLbl = new JLabel(roleText);
         roleLbl.setFont(new Font("SansSerif", Font.BOLD, 12));
         roleLbl.setForeground(Theme.ACCENT);
@@ -202,15 +202,24 @@ public class UserProfile extends JFrame {
         body.add(sectionTitle("Actions du compte"));
         body.add(Box.createVerticalStrut(8));
 
-        PrimaryButton histBtn = new PrimaryButton("📋  Historique de mes commandes");
+        PrimaryButton histBtn = new PrimaryButton("Historique de mes commandes");
         histBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, Theme.BTN_H + 4));
         histBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         histBtn.addActionListener(e -> AppNavigator.show(new OrderHistory(currentUser)));
         body.add(histBtn);
         body.add(Box.createVerticalStrut(10));
 
+        if (currentUser.isAdmin()) {
+            PrimaryButton adminBtn = new PrimaryButton("Panneau d'administration");
+            adminBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, Theme.BTN_H + 4));
+            adminBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+            adminBtn.addActionListener(e -> AppNavigator.show(new AdminPanel(currentUser)));
+            body.add(adminBtn);
+            body.add(Box.createVerticalStrut(10));
+        }
+
         if (currentUser.isSeller()) {
-            AccentButton dashBtn = new AccentButton("📊  Tableau de bord vendeur");
+            AccentButton dashBtn = new AccentButton("Tableau de bord vendeur");
             dashBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, Theme.BTN_H + 4));
             dashBtn.addActionListener(e -> AppNavigator.show(new SellerDashboard(currentUser)));
             body.add(dashBtn);
@@ -218,7 +227,7 @@ public class UserProfile extends JFrame {
         }
 
         // Changer le mot de passe
-        SecondaryButton chgPwdBtn = new SecondaryButton("🔐  Changer le mot de passe");
+        SecondaryButton chgPwdBtn = new SecondaryButton("Changer le mot de passe");
         chgPwdBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, Theme.BTN_H + 4));
         chgPwdBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         chgPwdBtn.addActionListener(e -> showChangePasswordDialog());
