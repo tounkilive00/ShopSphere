@@ -120,5 +120,20 @@ public class Theme {
         return "SansSerif";
     }
 
+    /** Applique un style moderne et lisible avec en-tete sombre ultra-visible a n'importe quel JTable. */
+    public static void styleTable(javax.swing.JTable t) {
+        t.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        t.setRowHeight(38);
+        t.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        t.getTableHeader().setPreferredSize(new java.awt.Dimension(0, 38));
+        t.getTableHeader().setReorderingAllowed(false);
+        t.getTableHeader().setDefaultRenderer(new view.components.CustomHeaderRenderer());
+        t.setGridColor(new Color(0xE2, 0xE8, 0xF0));
+        t.setShowHorizontalLines(true);
+        t.setShowVerticalLines(false);
+        t.setSelectionBackground(new Color(0xE0, 0xF2, 0xFE));
+        t.setSelectionForeground(Theme.DARK_TEXT);
+    }
+
     private Theme() {}
 }
