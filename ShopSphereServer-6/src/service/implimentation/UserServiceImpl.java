@@ -189,16 +189,27 @@ public class UserServiceImpl extends UnicastRemoteObject implements UserService 
             msg = "Your ShopSphere code is: " + code + ". Valid for 10 minutes.";
         }
 
-        // Creer notification in-app + simuler SMS/email
+        // Creer notification in-app
         Notification notif = new Notification(user,
                 "Code de verification", msg, TypeNotif.SECURITE);
         notifDao.createNotification(notif);
 
-        if ("SMS".equals(canal)) {
-            LOG.info("[SMS vers " + user.getPhone() + "] " + msg);
-        } else {
-            LOG.info("[EMAIL vers " + user.getEmail() + "] " + msg);
-        }
+        // Envoyer le code par email ou SMS dans un thread daemon
+        // (pour ne pas bloquer l'appel RMI)
+        final String finalCode  = code;
+        final String finalCanal = canal;
+        final String dest       = ("SMS".equals(canal)) ? user.getPhone() : user.getEmail();
+        final String lang       = user.getPreferredLanguage();
+        Thread sender = new Thread(() -> {
+            if ("SMS".equals(finalCanal)) {
+                // Pas de gateway SMS integre — afficher dans la console
+                LOG.info("[SMS vers " + dest + "] " + msg);
+            } else {
+                EmailUtil.envoyerOtp(dest, finalCode, lang);
+            }
+        }, "otp-sender");
+        sender.setDaemon(true);
+        sender.start();
         // Le code en clair est detruit ici — jamais logue ailleurs
     }
 
