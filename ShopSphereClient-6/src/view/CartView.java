@@ -1,6 +1,7 @@
 /*
  * ShopSphere - CartView
- * Fenetre du panier — liste les articles, total, et bouton passer commande
+ * Fenetre du panier — liste des articles, total, et bouton passer commande.
+ * Design amélioré : état vide illustré, contrôles quantité, Toast de confirmation.
  */
 package view;
 
@@ -24,6 +25,7 @@ public class CartView extends JFrame {
     private JPanel itemsPanel;
     private JLabel totalLabel;
 
+
     public CartView(User user) {
         this.currentUser = user;
         initComponents();
@@ -31,10 +33,6 @@ public class CartView extends JFrame {
         buildUI();
     }
 
-    /**
-     * Connexion RMI — identique a AgriConnect : LocateRegistry.getRegistry(host, port)
-     * + reg.lookup("OrderService").
-     */
     private void connectToServer() {
         try {
             Registry reg = LocateRegistry.getRegistry("127.0.0.1", 4999);
@@ -46,20 +44,23 @@ public class CartView extends JFrame {
 
     private void buildUI() {
         setTitle("ShopSphere — Mon panier");
-        setSize(600, 520);
+        setSize(640, 560);
+        setMinimumSize(new Dimension(560, 480));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(Theme.NEUTRAL);
         setLayout(new BorderLayout());
 
-        // Header — design fourni par view.components.PageHeader (reutilisable)
-        PageHeader header = new PageHeader("Mon panier (" + Session.getCartCount() + " article(s))");
+        // ── Header ──────────────────────────────────────────────────────────
+        PageHeader header = new PageHeader("Mon panier",
+            Session.getCartCount() == 0 ? "Votre panier est vide"
+                : Session.getCartCount() + " article(s) dans votre panier");
         SecondaryButton backBtn = new SecondaryButton("← Catalogue");
         backBtn.addActionListener(e -> AppNavigator.show(new MarketPlace(currentUser)));
         header.addAction(backBtn);
         add(header, BorderLayout.NORTH);
 
-        // Liste articles
+        // ── Liste articles ──────────────────────────────────────────────────
         itemsPanel = new JPanel();
         itemsPanel.setLayout(new BoxLayout(itemsPanel, BoxLayout.Y_AXIS));
         itemsPanel.setBackground(Theme.NEUTRAL);
@@ -68,25 +69,55 @@ public class CartView extends JFrame {
 
         JScrollPane scroll = new JScrollPane(itemsPanel);
         scroll.setBorder(null);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.setBackground(Theme.NEUTRAL);
+        scroll.getViewport().setBackground(Theme.NEUTRAL);
         add(scroll, BorderLayout.CENTER);
 
-        // Pied de page — total + bouton
-        JPanel footer = new JPanel(new BorderLayout(16, 0));
-        footer.setBackground(Theme.WHITE);
+        // ── Pied de page — total + actions ─────────────────────────────────
+        JPanel footer = new JPanel(new BorderLayout(0, 0)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setColor(Theme.WHITE);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                // Ligne de séparation en haut
+                g2.setColor(Theme.LIGHT_GREY);
+                g2.drawLine(0, 0, getWidth(), 0);
+                g2.dispose();
+            }
+        };
+        footer.setOpaque(false);
         footer.setBorder(new EmptyBorder(14, 20, 14, 20));
 
-        totalLabel = new JLabel(String.format("Total : %.2f FCFA", Session.getCartTotal()));
-        totalLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        // Total
+        JPanel totalPanel = new JPanel();
+        totalPanel.setOpaque(false);
+        totalPanel.setLayout(new BoxLayout(totalPanel, BoxLayout.Y_AXIS));
+        JLabel totalTitle = new JLabel("Total à payer");
+        totalTitle.setFont(Theme.FONT_SMALL);
+        totalTitle.setForeground(Theme.GREY_TEXT);
+        totalLabel = new JLabel(String.format("%.0f FCFA", Session.getCartTotal()));
+        totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         totalLabel.setForeground(Theme.PRIMARY);
-        footer.add(totalLabel, BorderLayout.WEST);
+        totalPanel.add(totalTitle);
+        totalPanel.add(totalLabel);
+        footer.add(totalPanel, BorderLayout.WEST);
 
+        // Boutons
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        btnPanel.setBackground(Theme.WHITE);
-        SecondaryButton clearBtn = new SecondaryButton("Vider le panier");
-        clearBtn.addActionListener(e -> { Session.clearCart(); refreshItems(); updateTotal(); });
-        AccentButton orderBtn = new AccentButton("Passer la commande", 200, Theme.BTN_H);
+        btnPanel.setOpaque(false);
+        SecondaryButton clearBtn = new SecondaryButton("🗑  Vider le panier");
+        clearBtn.addActionListener(e -> {
+            Session.clearCart();
+            refreshItems();
+            updateTotal();
+            Toast.info(CartView.this, "Panier vidé.");
+        });
+        AccentButton orderBtn = new AccentButton("Passer la commande →", 210, Theme.BTN_H);
         orderBtn.addActionListener(e -> passCommande());
-        btnPanel.add(clearBtn); btnPanel.add(orderBtn);
+        btnPanel.add(clearBtn);
+        btnPanel.add(orderBtn);
         footer.add(btnPanel, BorderLayout.EAST);
         add(footer, BorderLayout.SOUTH);
         setVisible(true);
@@ -95,94 +126,198 @@ public class CartView extends JFrame {
     private void refreshItems() {
         itemsPanel.removeAll();
         List<OrderItem> cart = Session.getCart();
+
         if (cart.isEmpty()) {
-            JLabel emptyLbl = new JLabel("Votre panier est vide.");
-            emptyLbl.setFont(Theme.FONT_BODY);
-            emptyLbl.setForeground(Theme.GREY_TEXT);
-            emptyLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-            itemsPanel.add(Box.createVerticalStrut(40));
-            itemsPanel.add(emptyLbl);
+            // ── État vide illustré ──────────────────────────────────────────
+            JPanel emptyState = new JPanel(new GridBagLayout());
+            emptyState.setOpaque(false);
+            JPanel inner = new JPanel();
+            inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
+            inner.setOpaque(false);
+
+            JLabel emojiLbl = new JLabel("🛒");
+            emojiLbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 64));
+            emojiLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            JLabel titleLbl = new JLabel("Votre panier est vide");
+            titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            titleLbl.setForeground(Theme.DARK_TEXT);
+            titleLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            JLabel subLbl = new JLabel("Explorez le catalogue et ajoutez vos coups de cœur !");
+            subLbl.setFont(Theme.FONT_BODY);
+            subLbl.setForeground(Theme.GREY_TEXT);
+            subLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            PrimaryButton goShopBtn = new PrimaryButton("Découvrir les produits", 220, Theme.BTN_H);
+            goShopBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+            goShopBtn.addActionListener(e -> AppNavigator.show(new MarketPlace(currentUser)));
+
+            inner.add(emojiLbl);
+            inner.add(Box.createVerticalStrut(16));
+            inner.add(titleLbl);
+            inner.add(Box.createVerticalStrut(6));
+            inner.add(subLbl);
+            inner.add(Box.createVerticalStrut(20));
+            inner.add(goShopBtn);
+            emptyState.add(inner);
+            emptyState.setPreferredSize(new Dimension(560, 320));
+            itemsPanel.add(emptyState);
         } else {
+            // ── Liste des articles ─────────────────────────────────────────
             for (OrderItem item : cart) {
-                JPanel row = new JPanel(new BorderLayout(12, 0));
-                row.setBackground(Theme.WHITE);
-                row.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.LIGHT_GREY),
-                    new EmptyBorder(10, 10, 10, 10)
-                ));
-                row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 64));
+                JPanel row = new JPanel(new BorderLayout(14, 0)) {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.setColor(Theme.WHITE);
+                        g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+                        g2.dispose();
+                    }
+                };
+                row.setOpaque(false);
+                row.setBorder(new EmptyBorder(12, 14, 12, 14));
+                row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 72));
+
+                // Icône catégorie
+                JLabel iconLbl = new JLabel("📦");
+                if (item.getProduct().getCategory() != null) {
+                    switch (item.getProduct().getCategory()) {
+                        case ELECTRONIQUE: iconLbl.setText("📱"); break;
+                        case MODE:         iconLbl.setText("👗"); break;
+                        case MAISON:       iconLbl.setText("🏠"); break;
+                        case SPORT:        iconLbl.setText("⚽"); break;
+                        case BEAUTE:       iconLbl.setText("💄"); break;
+                        case ALIMENTATION: iconLbl.setText("🥗"); break;
+                        case LIVRES:       iconLbl.setText("📚"); break;
+                        case JOUETS:       iconLbl.setText("🎮"); break;
+                        case AUTOMOBILES:  iconLbl.setText("🚗"); break;
+                        case SANTE:        iconLbl.setText("💊"); break;
+                        default:           break;
+                    }
+                }
+                iconLbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 24));
+                row.add(iconLbl, BorderLayout.WEST);
+
+                // Nom + prix
+                JPanel namePanel = new JPanel();
+                namePanel.setLayout(new BoxLayout(namePanel, BoxLayout.Y_AXIS));
+                namePanel.setOpaque(false);
 
                 JLabel nameLbl = new JLabel(item.getProduct().getTitle());
-                nameLbl.setFont(Theme.FONT_HEADING);
+                nameLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
                 nameLbl.setForeground(Theme.DARK_TEXT);
 
-                JLabel priceLbl = new JLabel(String.format("%.2f FCFA x %.0f = %.2f FCFA",
-                        item.getUnitPrice(), item.getQuantity(), item.getSubtotal()));
+                JLabel priceLbl = new JLabel(String.format("%.0f FCFA × %.0f = %.0f FCFA",
+                    item.getUnitPrice(), item.getQuantity(), item.getSubtotal()));
                 priceLbl.setFont(Theme.FONT_BODY);
                 priceLbl.setForeground(Theme.GREY_TEXT);
 
-                JPanel namePanel = new JPanel();
-                namePanel.setLayout(new BoxLayout(namePanel, BoxLayout.Y_AXIS));
-                namePanel.setBackground(Theme.WHITE);
                 namePanel.add(nameLbl);
+                namePanel.add(Box.createVerticalStrut(2));
                 namePanel.add(priceLbl);
                 row.add(namePanel, BorderLayout.CENTER);
 
+                // Bouton retirer
                 SecondaryButton removeBtn = new SecondaryButton("Retirer");
-                removeBtn.setPreferredSize(new Dimension(80, 30));
+                removeBtn.setPreferredSize(new Dimension(80, 32));
                 removeBtn.addActionListener(e -> {
                     Session.removeFromCart(item.getProduct().getId());
-                    refreshItems(); updateTotal();
+                    refreshItems();
+                    updateTotal();
+                    Toast.warning(CartView.this, "<b>" + item.getProduct().getTitle() + "</b> retiré du panier.");
                 });
                 row.add(removeBtn, BorderLayout.EAST);
                 itemsPanel.add(row);
-                itemsPanel.add(Box.createVerticalStrut(6));
+                itemsPanel.add(Box.createVerticalStrut(8));
             }
         }
-        itemsPanel.revalidate(); itemsPanel.repaint();
+        itemsPanel.revalidate();
+        itemsPanel.repaint();
     }
 
     private void updateTotal() {
         if (totalLabel != null)
-            totalLabel.setText(String.format("Total : %.2f FCFA", Session.getCartTotal()));
+            totalLabel.setText(String.format("%.0f FCFA", Session.getCartTotal()));
     }
 
     private void passCommande() {
         if (Session.getCart().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Votre panier est vide.", "Panier", JOptionPane.WARNING_MESSAGE);
+            Toast.warning(this, "Votre panier est vide.");
             return;
         }
-        String adresse = JOptionPane.showInputDialog(this,
-                "Adresse de livraison :", "Livraison", JOptionPane.QUESTION_MESSAGE);
-        if (adresse == null || adresse.isEmpty()) return;
+
+        // ── Dialogue stylisé : adresse + paiement ──────────────────────────
+        JPanel dialogPanel = new JPanel();
+        dialogPanel.setLayout(new BoxLayout(dialogPanel, BoxLayout.Y_AXIS));
+        dialogPanel.setBorder(new EmptyBorder(8, 4, 8, 4));
+        dialogPanel.setBackground(Theme.WHITE);
+
+        JLabel addrLabel = new JLabel("Adresse de livraison :");
+        addrLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        addrLabel.setForeground(Theme.DARK_TEXT);
+        addrLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField addrField = new JTextField(30);
+        addrField.setFont(Theme.FONT_BODY);
+        addrField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Theme.MID_GREY, 1, true),
+            new EmptyBorder(6, 10, 6, 10)));
+        addrField.setMaximumSize(new Dimension(Integer.MAX_VALUE, Theme.FIELD_H));
+        addrField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        dialogPanel.add(addrLabel);
+        dialogPanel.add(Box.createVerticalStrut(6));
+        dialogPanel.add(addrField);
+        dialogPanel.add(Box.createVerticalStrut(14));
+
+        JLabel payLabel = new JLabel("Mode de paiement :");
+        payLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        payLabel.setForeground(Theme.DARK_TEXT);
+        payLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         String[] paiements = {"Mobile Money (Airtel / Moov)", "Carte bancaire", "Paiement à la livraison"};
-        String paiement = (String) JOptionPane.showInputDialog(this,
-                "Mode de paiement :", "Paiement",
-                JOptionPane.QUESTION_MESSAGE, null, paiements, paiements[0]);
-        if (paiement == null) return;
+        JComboBox<String> payBox = new JComboBox<>(paiements);
+        payBox.setFont(Theme.FONT_BODY);
+        payBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, Theme.FIELD_H));
+        payBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        dialogPanel.add(payLabel);
+        dialogPanel.add(Box.createVerticalStrut(6));
+        dialogPanel.add(payBox);
+
+        int result = JOptionPane.showConfirmDialog(this, dialogPanel,
+            "Finaliser la commande", JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE);
+
+        if (result != JOptionPane.OK_OPTION) return;
+
+        String adresse = addrField.getText().trim();
+        String paiement = (String) payBox.getSelectedItem();
+
+        if (adresse.isEmpty()) {
+            Toast.error(this, "Veuillez saisir une adresse de livraison.");
+            return;
+        }
 
         SwingWorker<model.Order, Void> worker = new SwingWorker<model.Order, Void>() {
             @Override protected model.Order doInBackground() throws Exception {
                 if (orderService == null) { connectToServer(); }
-                if (orderService == null) {
-                    throw new Exception("Cannot connect to server.");
-                }
+                if (orderService == null) throw new Exception("Cannot connect to server.");
                 return orderService.passerCommande(
-                        currentUser.getId(), Session.getCart(), adresse, paiement);
+                    currentUser.getId(), Session.getCart(), adresse, paiement);
             }
             @Override protected void done() {
                 try {
                     model.Order order = get();
                     Session.clearCart();
-                    JOptionPane.showMessageDialog(CartView.this,
-                        "Commande #" + order.getId() + " passée avec succès !\nTotal : "
-                        + String.format("%.2f FCFA", order.getTotalAmount()),
-                        "Commande confirmée", JOptionPane.INFORMATION_MESSAGE);
+                    Toast.success(CartView.this,
+                        "Commande #" + order.getId() + " confirmée ! Total : "
+                        + String.format("%.0f FCFA", order.getTotalAmount()));
                     AppNavigator.show(new MarketPlace(currentUser));
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(CartView.this,
-                        "Erreur : " + ErrorUtil.rootMessage(ex), "Erreur", JOptionPane.ERROR_MESSAGE);
+                    Toast.error(CartView.this, "Erreur : " + ErrorUtil.rootMessage(ex));
                 }
             }
         };
