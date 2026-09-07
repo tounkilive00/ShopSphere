@@ -30,18 +30,14 @@ public class MarketPlace extends JFrame {
         this.currentUser = user;
         initComponents();
         buildUI();
-        connectAndLoadProducts(); // Connexion + chargement asynchrones
+        connectAndLoadProducts();
     }
 
-    // ── Connexion + chargement des produits en une seule passe ───────────────
+    // ── Connexion + chargement des produits ──────────────────────────────────
     private void connectAndLoadProducts() {
         statusLabel.setText("Connexion au serveur...");
         productsGrid.removeAll();
-        JLabel loadingLbl = new JLabel("Chargement des produits...");
-        loadingLbl.setFont(Theme.FONT_BODY);
-        loadingLbl.setForeground(Theme.GREY_TEXT);
-        loadingLbl.setHorizontalAlignment(SwingConstants.CENTER);
-        productsGrid.add(loadingLbl);
+        productsGrid.add(buildLoadingPanel("Chargement des produits..."));
         productsGrid.revalidate();
 
         SwingWorker<List<Product>, Void> worker = new SwingWorker<List<Product>, Void>() {
@@ -52,7 +48,6 @@ public class MarketPlace extends JFrame {
                         Registry reg = LocateRegistry.getRegistry("127.0.0.1", 4999);
                         productService = (ProductService) reg.lookup("ProductService");
                     } catch (Exception e) {
-                        // Une seule tentative de reconnexion apres 400 ms
                         Thread.sleep(400);
                         Registry reg = LocateRegistry.getRegistry("127.0.0.1", 4999);
                         productService = (ProductService) reg.lookup("ProductService");
@@ -68,10 +63,9 @@ public class MarketPlace extends JFrame {
                 try {
                     List<Product> products = get();
                     if (products == null || products.isEmpty()) {
-                        JLabel emptyLbl = new JLabel("Aucun produit disponible pour le moment.");
-                        emptyLbl.setFont(Theme.FONT_BODY);
-                        emptyLbl.setForeground(Theme.GREY_TEXT);
-                        productsGrid.add(emptyLbl);
+                        productsGrid.add(buildEmptyPanel(
+                            "Aucun produit disponible pour le moment.",
+                            "Les vendeurs ajouteront bientôt des articles.", "🛍"));
                         statusLabel.setText("0 produit(s)");
                     } else {
                         for (Product p : products) {
@@ -79,9 +73,8 @@ public class MarketPlace extends JFrame {
                                 product -> {
                                     Session.addToCart(product, 1);
                                     navBar.updateCartBadge(Session.getCartCount());
-                                    JOptionPane.showMessageDialog(MarketPlace.this,
-                                        "<html><b>" + product.getTitle() + "</b><br>ajoute au panier !</html>",
-                                        "Panier", JOptionPane.INFORMATION_MESSAGE);
+                                    Toast.success(MarketPlace.this,
+                                        "<b>" + product.getTitle() + "</b> ajouté au panier !");
                                 },
                                 product -> AppNavigator.show(new ProductDetail(currentUser, product))
                             );
@@ -90,10 +83,9 @@ public class MarketPlace extends JFrame {
                         statusLabel.setText(products.size() + " produit(s) disponible(s)");
                     }
                 } catch (Exception ex) {
-                    JLabel errLbl = new JLabel("Erreur : " + ErrorUtil.rootMessage(ex));
-                    errLbl.setFont(Theme.FONT_BODY);
-                    errLbl.setForeground(Theme.ERROR);
-                    productsGrid.add(errLbl);
+                    productsGrid.add(buildEmptyPanel(
+                        "Impossible de charger les produits.",
+                        "Vérifiez que le serveur est démarré, puis réessayez.", "⚠"));
                     statusLabel.setText("Erreur de chargement");
                 }
                 productsGrid.revalidate();
@@ -106,16 +98,13 @@ public class MarketPlace extends JFrame {
     private void loadProducts(String keyword) {
         statusLabel.setText("Recherche...");
         productsGrid.removeAll();
-        JLabel loadingLbl = new JLabel("Recherche en cours...");
-        loadingLbl.setFont(Theme.FONT_BODY);
-        loadingLbl.setForeground(Theme.GREY_TEXT);
-        productsGrid.add(loadingLbl);
+        productsGrid.add(buildLoadingPanel("Recherche en cours..."));
         productsGrid.revalidate();
 
         SwingWorker<List<Product>, Void> worker = new SwingWorker<List<Product>, Void>() {
             @Override
             protected List<Product> doInBackground() throws Exception {
-                if (productService == null) throw new Exception("Non connecte au serveur.");
+                if (productService == null) throw new Exception("Non connecté au serveur.");
                 if (keyword != null && !keyword.isEmpty()) {
                     return productService.searchProductRecordsByName(keyword);
                 }
@@ -127,22 +116,23 @@ public class MarketPlace extends JFrame {
                 try {
                     List<Product> products = get();
                     if (products == null || products.isEmpty()) {
-                        JLabel empty = new JLabel("Aucun produit trouve.");
-                        empty.setFont(Theme.FONT_BODY);
-                        empty.setForeground(Theme.GREY_TEXT);
-                        productsGrid.add(empty);
+                        productsGrid.add(buildEmptyPanel(
+                            "Aucun résultat pour « " + keyword + " »",
+                            "Essayez un autre mot-clé ou parcourez les catégories.", "🔍"));
                     } else {
                         for (Product p : products) {
                             ProductCard card = new ProductCard(p,
                                 product -> {
                                     Session.addToCart(product, 1);
                                     navBar.updateCartBadge(Session.getCartCount());
+                                    Toast.success(MarketPlace.this,
+                                        "<b>" + product.getTitle() + "</b> ajouté au panier !");
                                 },
                                 product -> AppNavigator.show(new ProductDetail(currentUser, product))
                             );
                             productsGrid.add(card);
                         }
-                        statusLabel.setText(products.size() + " produit(s) trouve(s)");
+                        statusLabel.setText(products.size() + " produit(s) trouvé(s)");
                     }
                 } catch (Exception ex) {
                     statusLabel.setText("Erreur : " + ErrorUtil.rootMessage(ex));
@@ -159,7 +149,7 @@ public class MarketPlace extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 800);
         setMinimumSize(new Dimension(900, 600));
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // Plein écran au démarrage
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         getContentPane().setBackground(Theme.NEUTRAL);
@@ -178,21 +168,34 @@ public class MarketPlace extends JFrame {
         JPanel body = new JPanel(new BorderLayout());
         body.setBackground(Theme.NEUTRAL);
 
-        // Sidebar
         body.add(buildSidebar(), BorderLayout.WEST);
 
-        // Zone centrale
         JPanel center = new JPanel(new BorderLayout());
         center.setBackground(Theme.NEUTRAL);
 
         // Bandeau titre + statut
         JPanel titleBar = new JPanel(new BorderLayout());
         titleBar.setBackground(Theme.WHITE);
-        titleBar.setBorder(new EmptyBorder(12, 20, 12, 20));
+        titleBar.setBorder(new EmptyBorder(14, 20, 14, 20));
+
+        JPanel titleLeft = new JPanel();
+        titleLeft.setOpaque(false);
+        titleLeft.setLayout(new BoxLayout(titleLeft, BoxLayout.Y_AXIS));
+
         JLabel catLbl = new JLabel("Tous les produits");
-        catLbl.setFont(new Font("SansSerif", Font.BOLD, 17));
+        catLbl.setFont(new Font("Segoe UI", Font.BOLD, 18));
         catLbl.setForeground(Theme.DARK_TEXT);
-        titleBar.add(catLbl, BorderLayout.WEST);
+
+        String firstName = currentUser.getFullName() != null && currentUser.getFullName().contains(" ")
+            ? currentUser.getFullName().split(" ")[0]
+            : currentUser.getFullName();
+        JLabel welcomeLbl = new JLabel("Bonjour, " + firstName + " ! Découvrez nos nouveautés.");
+        welcomeLbl.setFont(Theme.FONT_SMALL);
+        welcomeLbl.setForeground(Theme.GREY_TEXT);
+
+        titleLeft.add(catLbl);
+        titleLeft.add(welcomeLbl);
+        titleBar.add(titleLeft, BorderLayout.WEST);
 
         statusLabel = new JLabel("");
         statusLabel.setFont(Theme.FONT_SMALL);
@@ -200,7 +203,7 @@ public class MarketPlace extends JFrame {
         titleBar.add(statusLabel, BorderLayout.EAST);
         center.add(titleBar, BorderLayout.NORTH);
 
-        // Grille produits 6 par ligne scrollable (6 par rangée)
+        // Grille produits 6 par ligne
         productsGrid = new JPanel(new GridLayout(0, 6, 12, 12));
         productsGrid.setBackground(Theme.NEUTRAL);
 
@@ -216,7 +219,6 @@ public class MarketPlace extends JFrame {
         scroll.getViewport().setBackground(Theme.NEUTRAL);
         center.add(scroll, BorderLayout.CENTER);
 
-        // Barre vendeur (si SELLER ou ADMIN)
         if (currentUser.isSeller()) {
             center.add(buildSellerBar(), BorderLayout.SOUTH);
         }
@@ -229,17 +231,16 @@ public class MarketPlace extends JFrame {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setBackground(Theme.WHITE);
-        sidebar.setPreferredSize(new Dimension(200, 0));
+        sidebar.setPreferredSize(new Dimension(210, 0));
         sidebar.setBorder(new EmptyBorder(16, 12, 16, 8));
 
-        JLabel catTitle = new JLabel("  Categories");
-        catTitle.setFont(new Font("SansSerif", Font.BOLD, 13));
+        JLabel catTitle = new JLabel("  Catégories");
+        catTitle.setFont(new Font("Segoe UI", Font.BOLD, 13));
         catTitle.setForeground(Theme.PRIMARY);
         catTitle.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
         sidebar.add(catTitle);
         sidebar.add(Box.createVerticalStrut(8));
 
-        // Separateur
         JSeparator sep = new JSeparator();
         sep.setForeground(Theme.LIGHT_GREY);
         sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
@@ -247,18 +248,20 @@ public class MarketPlace extends JFrame {
         sidebar.add(Box.createVerticalStrut(8));
 
         String[][] categories = {
-            {"Tous",          "•"},
-            {"Electronique",  "•"},
-            {"Mode",          "•"},
-            {"Maison",        "•"},
-            {"Sport",         "•"},
-            {"Beaute",        "•"},
-            {"Alimentation",  "•"},
-            {"Livres",        "•"},
-            {"Jouets",        "•"},
-            {"Automobiles",   "•"},
-            {"Sante",         "•"}
+            {"Tous",          "🏪"},
+            {"Electronique",  "📱"},
+            {"Mode",          "👗"},
+            {"Maison",        "🏠"},
+            {"Sport",         "⚽"},
+            {"Beaute",        "💄"},
+            {"Alimentation",  "🥗"},
+            {"Livres",        "📚"},
+            {"Jouets",        "🎮"},
+            {"Automobiles",   "🚗"},
+            {"Sante",         "💊"}
         };
+
+        final JLabel[] selected = {null};
 
         for (String[] cat : categories) {
             JLabel btn = new JLabel(cat[1] + "  " + cat[0]);
@@ -266,24 +269,38 @@ public class MarketPlace extends JFrame {
             btn.setForeground(Theme.DARK_TEXT);
             btn.setOpaque(true);
             btn.setBackground(Theme.WHITE);
-            btn.setBorder(new EmptyBorder(6, 10, 6, 8));
-            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
+            btn.setBorder(new EmptyBorder(8, 12, 8, 8));
+            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
             btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             btn.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override public void mouseEntered(java.awt.event.MouseEvent e) {
-                    btn.setBackground(Theme.NEUTRAL);
-                    btn.setForeground(Theme.PRIMARY);
+                    if (btn != selected[0]) {
+                        btn.setBackground(Theme.NEUTRAL);
+                        btn.setForeground(Theme.PRIMARY);
+                    }
                 }
                 @Override public void mouseExited(java.awt.event.MouseEvent e) {
-                    btn.setBackground(Theme.WHITE);
-                    btn.setForeground(Theme.DARK_TEXT);
+                    if (btn != selected[0]) {
+                        btn.setBackground(Theme.WHITE);
+                        btn.setForeground(Theme.DARK_TEXT);
+                    }
                 }
                 @Override public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (selected[0] != null) {
+                        selected[0].setBackground(Theme.WHITE);
+                        selected[0].setForeground(Theme.DARK_TEXT);
+                        selected[0].setFont(Theme.FONT_BODY);
+                    }
+                    btn.setBackground(new Color(0xE8, 0xF0, 0xFB));
+                    btn.setForeground(Theme.PRIMARY);
+                    btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                    selected[0] = btn;
                     filterByCategory(cat[0]);
                 }
             });
             sidebar.add(btn);
         }
+        sidebar.add(Box.createVerticalGlue());
         return sidebar;
     }
 
@@ -330,6 +347,7 @@ public class MarketPlace extends JFrame {
 
             statusLabel.setText("Filtrage : " + cat + "...");
             productsGrid.removeAll();
+            productsGrid.add(buildLoadingPanel("Filtrage : " + cat + "..."));
             productsGrid.revalidate();
 
             SwingWorker<List<Product>, Void> w = new SwingWorker<List<Product>, Void>() {
@@ -344,14 +362,18 @@ public class MarketPlace extends JFrame {
                     try {
                         List<Product> products = get();
                         if (products == null || products.isEmpty()) {
-                            JLabel empty = new JLabel("Aucun produit dans la categorie : " + cat);
-                            empty.setFont(Theme.FONT_BODY);
-                            empty.setForeground(Theme.GREY_TEXT);
-                            productsGrid.add(empty);
+                            productsGrid.add(buildEmptyPanel(
+                                "Aucun produit dans « " + cat + " »",
+                                "Revenez bientôt, cette catégorie s'enrichit !", "📦"));
                         } else {
                             for (Product p : products) {
                                 productsGrid.add(new ProductCard(p,
-                                    product -> { Session.addToCart(product, 1); navBar.updateCartBadge(Session.getCartCount()); },
+                                    product -> {
+                                        Session.addToCart(product, 1);
+                                        navBar.updateCartBadge(Session.getCartCount());
+                                        Toast.success(MarketPlace.this,
+                                            "<b>" + product.getTitle() + "</b> ajouté au panier !");
+                                    },
                                     product -> AppNavigator.show(new ProductDetail(currentUser, product))
                                 ));
                             }
@@ -370,53 +392,54 @@ public class MarketPlace extends JFrame {
         }
     }
 
-    /**
-     * WrapLayout — FlowLayout qui gere le retour a la ligne automatiquement.
-     * Evite que les ProductCards debordent hors de la zone visible.
-     */
-    private static class WrapLayout extends FlowLayout {
-        public WrapLayout(int align, int hgap, int vgap) { super(align, hgap, vgap); }
+    // ── Panneau de chargement ─────────────────────────────────────────────────
+    private JPanel buildLoadingPanel(String message) {
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBackground(Theme.NEUTRAL);
+        p.setPreferredSize(new Dimension(600, 300));
+        JPanel inner = new JPanel();
+        inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
+        inner.setOpaque(false);
+        JLabel iconLbl = new JLabel("⏳");
+        iconLbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 40));
+        iconLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel msgLbl = new JLabel(message);
+        msgLbl.setFont(Theme.FONT_BODY);
+        msgLbl.setForeground(Theme.GREY_TEXT);
+        msgLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        inner.add(iconLbl);
+        inner.add(Box.createVerticalStrut(10));
+        inner.add(msgLbl);
+        p.add(inner);
+        return p;
+    }
 
-        @Override
-        public Dimension preferredLayoutSize(Container target) {
-            return layoutSize(target, true);
-        }
-
-        @Override
-        public Dimension minimumLayoutSize(Container target) {
-            Dimension minimum = layoutSize(target, false);
-            minimum.width -= (getHgap() + 1);
-            return minimum;
-        }
-
-        private Dimension layoutSize(Container target, boolean preferred) {
-            synchronized (target.getTreeLock()) {
-                int targetWidth = target.getSize().width;
-                if (targetWidth == 0) targetWidth = Integer.MAX_VALUE;
-                int hgap = getHgap(), vgap = getVgap();
-                Insets insets = target.getInsets();
-                int maxWidth = targetWidth - (insets.left + insets.right + hgap * 2);
-                int nmembers = target.getComponentCount();
-                int x = 0, y = insets.top + vgap, rowHeight = 0;
-                for (int i = 0; i < nmembers; i++) {
-                    Component m = target.getComponent(i);
-                    if (m.isVisible()) {
-                        Dimension d = preferred ? m.getPreferredSize() : m.getMinimumSize();
-                        if (x == 0 || (x + d.width) <= maxWidth) {
-                            if (x > 0) x += hgap;
-                            x += d.width;
-                            rowHeight = Math.max(rowHeight, d.height);
-                        } else {
-                            x = d.width;
-                            y += vgap + rowHeight;
-                            rowHeight = d.height;
-                        }
-                    }
-                }
-                y += rowHeight + insets.bottom + vgap;
-                return new Dimension(targetWidth, y);
-            }
-        }
+    // ── Panneau vide / erreur ─────────────────────────────────────────────────
+    private JPanel buildEmptyPanel(String title, String subtitle, String icon) {
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBackground(Theme.NEUTRAL);
+        p.setPreferredSize(new Dimension(600, 300));
+        JPanel inner = new JPanel();
+        inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
+        inner.setOpaque(false);
+        JLabel iconLbl = new JLabel(icon);
+        iconLbl.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 48));
+        iconLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel titleLbl = new JLabel(title);
+        titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLbl.setForeground(Theme.DARK_TEXT);
+        titleLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel subLbl = new JLabel(subtitle);
+        subLbl.setFont(Theme.FONT_BODY);
+        subLbl.setForeground(Theme.GREY_TEXT);
+        subLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        inner.add(iconLbl);
+        inner.add(Box.createVerticalStrut(12));
+        inner.add(titleLbl);
+        inner.add(Box.createVerticalStrut(4));
+        inner.add(subLbl);
+        p.add(inner);
+        return p;
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
